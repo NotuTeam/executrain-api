@@ -4,6 +4,7 @@ const auth = require("express").Router();
 
 const {
   genesis,
+  me,
   login,
   refresh,
   user_list,
@@ -16,12 +17,13 @@ const { islogin } = require("../../middleware/privilege");
 
 // GET
 auth.get("/genesis", genesis);
+auth.get("/me", islogin, me);
 auth.get("/refresh", islogin, refresh);
-auth.get("/list", user_list);
+auth.get("/list", islogin, user_list);
 
 // POST
 auth.post("/login", login);
-auth.post("/register", register);
+auth.post("/register", islogin, register);
 
 // PUT
 auth.put("/adjust/:id", islogin, adjust);

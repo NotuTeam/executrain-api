@@ -24,7 +24,7 @@ const islogin = (req, res, next) => {
         });
       }
 
-      req.token = decoded;
+      req.token = { ...decoded, token: access_token };
       next();
     });
   } catch (error) {

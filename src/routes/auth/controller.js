@@ -11,7 +11,7 @@ const {
 } = require("../../lib/jwt");
 
 const { GENESIS_PASSWORD } = require("../../config/var");
-const { ROLE, GENDER, RefreshToken } = require("../../config/enum");
+const { ROLE, RefreshToken } = require("../../config/enum");
 
 const genesis = async (req, res) => {
   try {
@@ -30,7 +30,6 @@ const genesis = async (req, res) => {
         username: "SUPER",
         display_name: "SUPER",
         role: ROLE.SUPERADMIN,
-        gender: GENDER.DEFAULT,
         password: encrypted_password,
       });
 
@@ -75,6 +74,44 @@ const genesis = async (req, res) => {
   }
 };
 
+const me = async (req, res) => {
+  try {
+    const token = req.token;
+
+    if (!token) {
+      return res.status(400).json({
+        status: 400,
+        message: "forbidden",
+      });
+    } else {
+      const user = await User.findOne({ _id: token.id });
+
+      if (!user) {
+        return res.status(400).json({
+          status: 400,
+          message: "User not found",
+        });
+      } else {
+        res.status(200).json({
+          status: 200,
+          message: "success",
+          id: user._id,
+          username: user.username,
+          display_name: user.display_name,
+          role: user.role,
+          access_token: token.token,
+        });
+      }
+    }
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({
+      status: 500,
+      message: "server error",
+    });
+  }
+};
+
 const login = async (req, res) => {
   const { username, password } = req.body;
 
@@ -99,15 +136,15 @@ const login = async (req, res) => {
       if (hashPassword) {
         //generate access token and refresh token
         const access_token = create_access_token(user._id, user.role);
-        const refresh_token = create_refresh_token(user._id, user.role);
+        // const refresh_token = create_refresh_token(user._id, user.role);
 
         //send cookie with contain refresh token
-        res.cookie(RefreshToken, refresh_token, {
-          expires: new Date(Date.now() + 1000 * 60 * 60 * 24), // one day
-          httpOnly: true,
-          secure: true,
-          sameSite: "none",
-        });
+        // res.cookie(RefreshToken, refresh_token, {
+        //   expires: new Date(Date.now() + 1000 * 60 * 60 * 24), // one day
+        //   httpOnly: true,
+        //   secure: true,
+        //   sameSite: "none",
+        // });
 
         res.status(200).json({
           status: 200,
@@ -116,7 +153,6 @@ const login = async (req, res) => {
           username: user.username,
           display_name: user.display_name,
           role: user.role,
-          gender: user.gender,
           access_token,
         });
       } else {
@@ -187,7 +223,7 @@ const user_list = async (req, res) => {
   try {
     const users = await User.find(
       {},
-      { _id: 1, username: 1, display_name: 1, role: 1 }
+      { _id: 1, username: 1, display_name: 1, role: 1, created_at: 1 }
     );
 
     if (users.length > 0 && users !== null) {
@@ -212,7 +248,7 @@ const user_list = async (req, res) => {
 };
 
 const register = async (req, res) => {
-  const { password, display_name, username, gender } = req.body;
+  const { password, display_name, username } = req.body;
   const role = ROLE.DEFAULT;
 
   try {
@@ -231,7 +267,6 @@ const register = async (req, res) => {
         username,
         display_name,
         role,
-        gender,
         password: encrypted_password,
       });
 
@@ -251,12 +286,13 @@ const register = async (req, res) => {
         res.status(201).json({
           status: 201,
           message: "success",
-          id: new_user._id,
-          username: new_user.username,
-          display_name: new_user.display_name,
-          gender: new_user.gender,
-          role,
-          access_token,
+          data: {
+            id: new_user._id,
+            username: new_user.username,
+            display_name: new_user.display_name,
+            role,
+            access_token,
+          },
         });
       } else {
         return res.status(400).json({
@@ -276,12 +312,7 @@ const register = async (req, res) => {
 
 const adjust = async (req, res) => {
   const { id } = req.params;
-  const {
-    username = null,
-    display_name = null,
-    password = null,
-    gender = null,
-  } = req.body;
+  const { username = null, display_name = null, password = null } = req.body;
 
   try {
     let new_password = "";
@@ -291,7 +322,7 @@ const adjust = async (req, res) => {
 
     const user = await User.updateOne(
       { _id: id },
-      { username, display_name, password: new_password, gender }
+      { username, display_name, password: new_password }
     );
 
     // when data user is not found
@@ -341,6 +372,7 @@ const takedown = async (req, res) => {
 
 module.exports = {
   genesis,
+  me,
   login,
   refresh,
   user_list,
