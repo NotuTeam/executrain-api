@@ -16,7 +16,7 @@ const routes = require("./src/routes/index");
 
 // Nodemon configuration for hot reload
 if (NODE_ENV !== "production") {
-  console.log("🔥 Development mode - Hot reload enabled");
+  console.log("Development mode - Hot reload enabled");
 }
 
 const app = express();
