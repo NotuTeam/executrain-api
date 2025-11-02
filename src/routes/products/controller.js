@@ -1,31 +1,27 @@
 /** @format */
 
-const Schedule = require("./model");
+const Product = require("./model");
 
 const { upload, destroy } = require("../../lib/cd");
 
-const schedule_list = async (req, res) => {
+const product_list = async (req, res) => {
   try {
-    Schedule.find(
+    Product.find(
       {},
       {
         _id: 1,
-        schedule_name: 1,
-        schedule_date: 1,
-        status: 1,
+        product_name: 1,
+        product_category: 1,
+        skill_level: 1,
+        duration: 1,
         banner: 1,
-        schedule_start: 1,
-        schedule_end: 1,
-        location: 1,
-        quota: 1,
-        lecturer: 1,
       }
     )
-      .then((users) => {
+      .then((products) => {
         res.status(200).json({
           status: 200,
           message: "success",
-          data: users,
+          data: products,
         });
       })
       .catch((error) => {
@@ -33,7 +29,7 @@ const schedule_list = async (req, res) => {
         res.status(200).json({
           status: 200,
           data: [],
-          message: "No Schedule Found",
+          message: "No Products Found",
         });
       });
   } catch (error) {
@@ -45,24 +41,24 @@ const schedule_list = async (req, res) => {
   }
 };
 
-const schedule_detail = async (req, res) => {
+const product_detail = async (req, res) => {
   const { id } = req.params;
 
   try {
-    Schedule.findOne({ _id: id })
-      .then((schedule) => {
+    Product.findOne({ _id: id })
+      .then((product) => {
         res.status(200).json({
           status: 200,
           message: "success",
-          data: schedule,
+          data: product,
         });
       })
       .catch((error) => {
         console.log(error);
         res.status(200).json({
           status: 200,
-          data: [],
-          message: "No Schedule Found",
+          data: {},
+          message: "No Product Found",
         });
       });
   } catch (error) {
@@ -76,36 +72,28 @@ const schedule_detail = async (req, res) => {
 
 const add = async (req, res) => {
   const {
-    schedule_name,
-    schedule_description,
-    schedule_date,
-    schedule_start,
-    schedule_end,
-    location,
-    quota,
-    lecturer,
-    is_assestment,
+    product_name,
+    product_description,
+    product_category,
     benefits,
     skill_level,
     language,
-    status,
+    max_participant,
+    instructors,
+    duration,
   } = req.body;
 
   try {
     let payload = {
-      schedule_name,
-      schedule_description,
-      schedule_date,
-      schedule_start,
-      schedule_end,
-      location,
-      quota,
-      lecturer,
-      is_assestment,
+      product_name,
+      product_description,
+      product_category,
       benefits,
       skill_level,
       language,
-      status,
+      max_participant,
+      instructors,
+      duration,
     };
 
     if (req.files) {
@@ -118,46 +106,19 @@ const add = async (req, res) => {
       };
     }
 
-    Schedule.insertOne(payload)
-      .then((schedule) => {
+    Product.insertOne(payload)
+      .then((page) => {
         res.status(201).json({
           status: 201,
           message: "success",
-          data: schedule,
+          data: page,
         });
       })
       .catch((error) => {
         console.log(error);
         return res.status(400).json({
           status: 400,
-          message: "failed to create an schedule",
-        });
-      });
-  } catch (error) {
-    console.log(error.message);
-    return res.status(500).json({
-      status: 500,
-      message: "server error",
-    });
-  }
-};
-
-const add_bulk = async (req, res) => {
-  const { data } = req.body;
-
-  try {
-    Schedule.insertMany(data)
-      .then(() => {
-        res.status(201).json({
-          status: 201,
-          message: "success",
-        });
-      })
-      .catch((error) => {
-        console.log(error);
-        return res.status(400).json({
-          status: 400,
-          message: "failed to do bulk create schedule",
+          message: "failed to create an product",
         });
       });
   } catch (error) {
@@ -172,39 +133,31 @@ const add_bulk = async (req, res) => {
 const adjust = async (req, res) => {
   const { id } = req.params;
   const {
-    schedule_name,
-    schedule_description,
-    schedule_date,
-    schedule_start,
-    schedule_end,
-    location,
-    quota,
-    lecturer,
-    is_assestment,
+    product_name,
+    product_description,
+    product_category,
     benefits,
     skill_level,
     language,
-    status,
+    max_participant,
+    instructors,
+    duration,
   } = req.body;
 
-  try {
-    let payload = {
-      schedule_name,
-      schedule_description,
-      schedule_date,
-      schedule_start,
-      schedule_end,
-      location,
-      quota,
-      lecturer,
-      is_assestment,
-      benefits,
-      skill_level,
-      language,
-      status,
-      updated_at: Date.now(),
-    };
+  let payload = {
+    product_name,
+    product_description,
+    product_category,
+    benefits,
+    skill_level,
+    language,
+    max_participant,
+    instructors,
+    duration,
+    updated_at: Date.now(),
+  };
 
+  try {
     if (req.files) {
       const { file } = req.files;
       const { url_picture, url_public } = await upload(file);
@@ -215,24 +168,24 @@ const adjust = async (req, res) => {
       };
     }
 
-    Schedule.updateOne({ _id: id }, payload)
+    Product.updateOne({ _id: id }, payload)
       .then((_) => {
         res.status(200).json({
           status: 200,
-          message: `successfully update schedule ${id}`,
+          message: `successfully update product ${id}`,
         });
       })
       .catch((error) => {
         console.log(error);
         return res.status(400).json({
           status: 400,
-          message: "schedule not found",
+          message: "product not found",
         });
       });
   } catch (err) {
     return res.status(404).json({
       status: 404,
-      message: "failed to update schedule",
+      message: "failed to update page",
     });
   }
 };
@@ -240,18 +193,18 @@ const adjust = async (req, res) => {
 const takedown = async (req, res) => {
   const { id } = req.params;
   try {
-    Schedule.deleteOne({ _id: id })
+    Product.deleteOne({ _id: id })
       .then(() => {
         res.status(200).json({
           status: 200,
-          message: `successfully takedown schedule ${id}`,
+          message: `successfully takedown product ${id}`,
         });
       })
       .catch((error) => {
         console.log(error);
         return res.status(400).json({
           status: 400,
-          message: "schedule not found",
+          message: "Product Not Found",
         });
       });
   } catch (error) {
@@ -265,9 +218,8 @@ const takedown = async (req, res) => {
 
 module.exports = {
   add,
-  add_bulk,
-  schedule_list,
-  schedule_detail,
+  product_list,
+  product_detail,
   adjust,
   takedown,
 };

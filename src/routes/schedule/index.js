@@ -16,6 +16,8 @@ const { islogin } = require("../../middleware/privilege");
 // GET
 schedule.get("/list", islogin, schedule_list);
 schedule.get("/detail/:id", islogin, schedule_detail);
+schedule.get("/public/list", schedule_list);
+schedule.get("/public/detail/:id", schedule_detail);
 
 // POST
 schedule.post("/add", islogin, add);

@@ -2,21 +2,26 @@
 
 const mongoose = require("mongoose");
 
-const { AVAILABILITY, SKILL_LEVELS, LANGUAGES } = require("../../config/enum");
+const { CATEGORIES, SKILL_LEVELS, LANGUAGES } = require("../../config/enum");
 
-const schedule_scheme = new mongoose.Schema({
-  schedule_name: String,
-  schedule_description: String,
-  schedule_date: Date,
-  schedule_start: String,
-  schedule_end: String,
-  location: String,
-  quota: Number,
-  lecturer: Number,
-  is_assestment: Boolean,
+const products_scheme = new mongoose.Schema({
+  product_name: String,
+  product_description: String,
+  max_participant: Number,
+  instructors: Number,
+  duration: Number,
   benefits: {
     type: Array,
     default: [],
+  },
+  product_category: {
+    type: String,
+    enum: [
+      CATEGORIES.IT_TRAINING,
+      CATEGORIES.IT_CONSULTANT,
+      CATEGORIES.IT_SUPPORT,
+    ],
+    default: CATEGORIES.IT_TRAINING,
   },
   skill_level: {
     type: String,
@@ -31,11 +36,6 @@ const schedule_scheme = new mongoose.Schema({
     type: String,
     enum: [LANGUAGES.INDONESIA, LANGUAGES.INGGRIS],
     default: LANGUAGES.INDONESIA,
-  },
-  status: {
-    type: String,
-    enum: [AVAILABILITY.FULL_BOOKED, AVAILABILITY.OPEN_SEAT],
-    default: AVAILABILITY.OPEN_SEAT,
   },
   banner: {
     type: Object,
@@ -54,6 +54,6 @@ const schedule_scheme = new mongoose.Schema({
   },
 });
 
-const Schedule = mongoose.model("Schedule", schedule_scheme);
+const Product = mongoose.model("Product", products_scheme);
 
-module.exports = Schedule;
+module.exports = Product;

@@ -45,7 +45,7 @@ const page_detail = async (req, res) => {
         console.log(error);
         res.status(200).json({
           status: 200,
-          data: [],
+          data: {},
           message: "No Page Found",
         });
       });
@@ -74,7 +74,7 @@ const page_layout = async (req, res) => {
         console.log(error);
         res.status(200).json({
           status: 200,
-          data: [],
+          data: {},
           message: "No Page Found",
         });
       });

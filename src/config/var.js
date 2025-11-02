@@ -11,6 +11,9 @@ const config = {
   REFRESH_TOKEN: process.env.REFRESH_TOKEN,
   ACCESS_TOKEN: process.env.ACCESS_TOKEN,
   GENESIS_PASSWORD: process.env.GENESIS_PASSWORD,
+  CDN_CLOUD_NAME: process.env.CDN_CLOUD_NAME,
+  CDN_API_KEY: process.env.CDN_API_KEY,
+  CDN_API_SECRET: process.env.CDN_API_SECRET,
 };
 
 module.exports = config;

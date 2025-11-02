@@ -1,6 +1,6 @@
 /** @format */
 
-const schedule = require("express").Router();
+const page = require("express").Router();
 
 const {
   add,
@@ -14,17 +14,17 @@ const {
 const { islogin } = require("../../middleware/privilege");
 
 // GET
-schedule.get("/list", islogin, page_list);
-schedule.get("/detail/:id", islogin, page_detail);
-schedule.get("/public/:path", page_layout);
+page.get("/list", islogin, page_list);
+page.get("/detail/:id", islogin, page_detail);
+page.get("/public/:path", page_layout);
 
 // POST
-schedule.post("/add", islogin, add);
+page.post("/add", islogin, add);
 
 // PUT
-schedule.put("/adjust/:id", islogin, adjust);
+page.put("/adjust/:id", islogin, adjust);
 
 // DELETE
-schedule.delete("/takedown/:id", islogin, takedown);
+page.delete("/takedown/:id", islogin, takedown);
 
-module.exports = schedule;
+module.exports = page;

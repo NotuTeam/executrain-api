@@ -27,7 +27,7 @@ const genesis = async (req, res) => {
       const encrypted_password = await encrpyt_one_way(GENESIS_PASSWORD);
 
       // create user
-      User.create({
+      User.insertOne({
         username: "SUPER",
         display_name: "SUPER",
         role: ROLE.SUPERADMIN,
@@ -266,7 +266,7 @@ const register = async (req, res) => {
           const encrypted_password = await encrpyt_one_way(password);
 
           // create user
-          User.create({
+          User.insertOne({
             username,
             display_name,
             role,
@@ -334,7 +334,7 @@ const adjust = async (req, res) => {
 
     User.updateOne(
       { _id: id },
-      { username, display_name, password: new_password }
+      { username, display_name, password: new_password, updated_at: Date.now() }
     )
       .then((_) => {
         res.status(200).json({

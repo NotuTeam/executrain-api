@@ -1,19 +1,42 @@
 /** @format */
 
-export const ROLE = {
+const ROLE = {
   SUPERADMIN: "SUPERADMIN",
   ADMIN: "ADMIN",
 };
 
-export const PRIORITY = {
-  HIGH: "HIGH",
-  MEDIUM: "MEDIUM",
-  LOW: "LOW",
+const AVAILABILITY = {
+  FULL_BOOKED: "FULL_BOOKED",
+  OPEN_SEAT: "OPEN_SEAT",
 };
 
-export const STATUS = {
+const STATUS = {
   DRAFT: "DRAFT",
   PUBLISHED: "PUBLISHED",
 };
 
-export const RefreshToken = "exc_refresh_token";
+const CATEGORIES = [
+  { IT_TRAINING: "IT_TRAINING" },
+  { IT_CONSULTANT: "IT_CONSULTANT" },
+  { IT_SUPPORT: "IT_SUPPORT" },
+];
+
+const SKILL_LEVELS = [
+  { BEGINNER: "BEGINNER" },
+  { INTERMEDIATE: "INTERMEDIATE" },
+  { EXPERT: "EXPERT" },
+];
+
+const LANGUAGES = [{ INDONESIA: "INDONESIA" }, { INGGRIS: "INGGRIS" }];
+
+const RefreshToken = "exc_refresh_token";
+
+module.exports = {
+  ROLE,
+  AVAILABILITY,
+  STATUS,
+  CATEGORIES,
+  SKILL_LEVELS,
+  LANGUAGES,
+  RefreshToken,
+};
