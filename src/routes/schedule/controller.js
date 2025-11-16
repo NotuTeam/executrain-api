@@ -6,41 +6,80 @@ const { upload, destroy } = require("../../lib/cd");
 
 const schedule_list = async (req, res) => {
   try {
-    Schedule.find(
-      {},
-      {
-        _id: 1,
-        schedule_name: 1,
-        schedule_date: 1,
-        status: 1,
-        banner: 1,
-        schedule_start: 1,
-        schedule_end: 1,
-        location: 1,
-        quota: 1,
-        lecturer: 1,
+    const { search, date } = req.query;
+
+    let filter = {};
+
+    if (search) {
+      filter.schedule_name = {
+        $regex: search,
+        $options: "i",
+      };
+
+      filter.schedule_date = {
+        $gte: new Date(),
+      };
+    } else if (date) {
+      const inputDate = new Date(date);
+
+      if (isNaN(inputDate.getTime())) {
+        return res.status(400).json({
+          status: 400,
+          message: "Invalid date format",
+        });
       }
-    )
-      .then((users) => {
-        res.status(200).json({
-          status: 200,
-          message: "success",
-          data: users,
-        });
-      })
-      .catch((error) => {
-        console.log(error);
-        res.status(200).json({
-          status: 200,
-          data: [],
-          message: "No Schedule Found",
-        });
-      });
+
+      const year = inputDate.getFullYear();
+      const month = inputDate.getMonth();
+
+      const startDate = new Date(year, month, 1, 0, 0, 0, 0);
+      const endDate = new Date(year, month + 1, 0, 23, 59, 59, 999);
+
+      filter.schedule_date = {
+        $gte: startDate,
+        $lte: endDate,
+      };
+    }
+
+    const schedules = await Schedule.find(filter, {
+      _id: 1,
+      schedule_name: 1,
+      schedule_date: 1,
+      status: 1,
+      banner: 1,
+      schedule_start: 1,
+      schedule_end: 1,
+      location: 1,
+      quota: 1,
+      lecturer: 1,
+      schedule_description: 1,
+    }).sort({ schedule_date: 1 });
+
+    res.status(200).json({
+      status: 200,
+      message: "success",
+      data: schedules,
+      filters: {
+        search: search || null,
+        date: date || null,
+        ...(search && {
+          info: "Menampilkan agenda aktif dan akan datang",
+        }),
+        ...(date &&
+          !search && {
+            month: new Date(date).toLocaleString("id-ID", {
+              month: "long",
+              year: "numeric",
+            }),
+          }),
+      },
+    });
   } catch (error) {
     console.log(error.message);
-    res.status(404).json({
-      status: 404,
+    res.status(500).json({
+      status: 500,
       message: "server error",
+      error: error.message,
     });
   }
 };

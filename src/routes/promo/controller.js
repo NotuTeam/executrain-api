@@ -43,8 +43,6 @@ const promo_list = async (req, res) => {
 };
 
 const promo_active = async (req, res) => {
-  const { id } = req.params;
-
   try {
     Promo.findOne({ is_active: true })
       .then((promo) => {
