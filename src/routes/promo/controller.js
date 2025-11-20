@@ -6,37 +6,64 @@ const { upload, destroy } = require("../../lib/cd");
 
 const promo_list = async (req, res) => {
   try {
-    Promo.find(
-      {},
-      {
-        _id: 1,
-        promo_name: 1,
-        promo_description: 1,
-        percentage: 1,
-        end_date: 1,
-        is_active: 1,
-        banner: 1,
-      }
-    )
-      .then((promos) => {
-        res.status(200).json({
-          status: 200,
-          message: "success",
-          data: promos,
-        });
-      })
-      .catch((error) => {
-        console.log(error);
-        res.status(200).json({
-          status: 200,
-          data: [],
-          message: "No promos Found",
-        });
-      });
+    const page = parseInt(req.query.page) || 1;
+    const limit = 6;
+    const skip = (page - 1) * limit;
+
+    const promo_name = req.query.promo_name;
+    const is_active = req.query.is_active;
+    const sort_order = req.query.sort_order || "desc";
+
+    const filter = {};
+
+    // Filter by promo name (search)
+    if (promo_name) {
+      filter.promo_name = { $regex: promo_name, $options: "i" };
+    }
+
+    // Filter by active status
+    if (is_active !== undefined && is_active !== "") {
+      filter.is_active = is_active === "true";
+    }
+
+    const sort = {
+      created_at: sort_order === "asc" ? 1 : -1,
+    };
+
+    const total_promos = await Promo.countDocuments(filter);
+    const total_pages = Math.ceil(total_promos / limit);
+
+    const promos = await Promo.find(filter, {
+      _id: 1,
+      promo_name: 1,
+      promo_description: 1,
+      percentage: 1,
+      end_date: 1,
+      is_active: 1,
+      banner: 1,
+      created_at: 1,
+    })
+      .sort(sort)
+      .skip(skip)
+      .limit(limit);
+
+    res.status(200).json({
+      status: 200,
+      message: "success",
+      data: promos,
+      pagination: {
+        current_page: page,
+        total_pages: total_pages,
+        total_promos: total_promos,
+        per_page: limit,
+        has_next: page < total_pages,
+        has_prev: page > 1,
+      },
+    });
   } catch (error) {
     console.log(error.message);
-    res.status(404).json({
-      status: 404,
+    res.status(500).json({
+      status: 500,
       message: "server error",
     });
   }

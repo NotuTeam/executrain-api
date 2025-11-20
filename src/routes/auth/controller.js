@@ -221,10 +221,26 @@ const refresh = async (req, res) => {
 
 const user_list = async (req, res) => {
   try {
-    User.find(
-      {},
-      { _id: 1, username: 1, display_name: 1, role: 1, created_at: 1 }
-    )
+    const { search } = req.query;
+
+    let query = {};
+
+    if (search) {
+      query = {
+        $or: [
+          { username: { $regex: search, $options: "i" } },
+          { display_name: { $regex: search, $options: "i" } },
+        ],
+      };
+    }
+
+    User.find(query, {
+      _id: 1,
+      username: 1,
+      display_name: 1,
+      role: 1,
+      created_at: 1,
+    })
       .then((users) => {
         res.status(200).json({
           status: 200,
@@ -248,7 +264,6 @@ const user_list = async (req, res) => {
     });
   }
 };
-
 const register = async (req, res) => {
   const { password, display_name, username } = req.body;
   const role = ROLE.DEFAULT;

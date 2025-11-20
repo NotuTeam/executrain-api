@@ -8,6 +8,7 @@ const {
   page_detail,
   page_layout,
   adjust,
+  change_status,
   takedown,
 } = require("./controller");
 
@@ -23,6 +24,7 @@ page.post("/add", islogin, add);
 
 // PUT
 page.put("/adjust/:id", islogin, adjust);
+page.put("/pub/:id", islogin, change_status);
 
 // DELETE
 page.delete("/takedown/:id", islogin, takedown);
