@@ -101,6 +101,8 @@ const page_detail = async (req, res) => {
 const page_layout = async (req, res) => {
   const { path } = req.params;
 
+  console.log(path);
+
   try {
     const page = await Page.findOne({ path, status: "PUBLISHED" });
 
@@ -402,7 +404,7 @@ const change_status = async (req, res) => {
     }
 
     // Toggle status
-    const newStatus = page.status === "published" ? "draft" : "published";
+    const newStatus = page.status === "published" ? "DRAFT" : "PUBLISHED";
 
     // Update status
     await Page.updateOne(
