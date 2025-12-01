@@ -9,6 +9,24 @@ const products_scheme = new mongoose.Schema({
   product_description: String,
   max_participant: Number,
   instructors: Number,
+  instructor_list: {
+    type: [
+      {
+        name: {
+          type: String,
+          required: true,
+        },
+        photo: {
+          type: Object,
+          default: {
+            public_id: "",
+            url: "",
+          },
+        },
+      },
+    ],
+    default: [],
+  },
   duration: Number,
   benefits: {
     type: Array,

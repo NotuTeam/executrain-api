@@ -10,6 +10,7 @@ const schedule_list = async (req, res) => {
 
     let filter = {};
 
+    // Jika ada pencarian
     if (search) {
       filter.schedule_name = {
         $regex: search,
@@ -19,27 +20,9 @@ const schedule_list = async (req, res) => {
       filter.schedule_date = {
         $gte: new Date(),
       };
-    } else if (date) {
-      const inputDate = new Date(date);
-
-      if (isNaN(inputDate.getTime())) {
-        return res.status(400).json({
-          status: 400,
-          message: "Invalid date format",
-        });
-      }
-
-      const year = inputDate.getFullYear();
-      const month = inputDate.getMonth();
-
-      const startDate = new Date(year, month, 1, 0, 0, 0, 0);
-      const endDate = new Date(year, month + 1, 0, 23, 59, 59, 999);
-
-      filter.schedule_date = {
-        $gte: startDate,
-        $lte: endDate,
-      };
     }
+    // Jika tidak ada search dan tidak ada date, tampilkan semua data
+    // (tidak ada filter tambahan)
 
     const schedules = await Schedule.find(filter, {
       _id: 1,
@@ -66,12 +49,9 @@ const schedule_list = async (req, res) => {
         ...(search && {
           info: "Menampilkan agenda aktif dan akan datang",
         }),
-        ...(date &&
-          !search && {
-            month: new Date(date).toLocaleString("id-ID", {
-              month: "long",
-              year: "numeric",
-            }),
+        ...(!search &&
+          !date && {
+            info: "Menampilkan semua agenda",
           }),
       },
     });
