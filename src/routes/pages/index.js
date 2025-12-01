@@ -5,6 +5,7 @@ const page = require("express").Router();
 const {
   add,
   page_list,
+  page_published,
   page_detail,
   page_layout,
   adjust,
@@ -16,6 +17,7 @@ const { islogin } = require("../../middleware/privilege");
 
 // GET
 page.get("/list", islogin, page_list);
+page.get("/public/published", page_published);
 page.get("/detail/:id", islogin, page_detail);
 page.get("/public/:path", page_layout);
 

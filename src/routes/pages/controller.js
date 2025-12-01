@@ -71,6 +71,36 @@ const page_list = async (req, res) => {
   }
 };
 
+const page_published = async (req, res) => {
+  try {
+    const pages = await Page.find(
+      { status: "PUBLISHED" },
+      {
+        _id: 1,
+        name: 1,
+        path: 1,
+        status: 1,
+        created_at: 1,
+        updated_at: 1,
+      }
+    );
+
+    console.log(pages);
+
+    res.status(200).json({
+      status: 200,
+      message: "success",
+      data: pages,
+    });
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({
+      status: 500,
+      message: "server error",
+    });
+  }
+};
+
 const page_detail = async (req, res) => {
   const { id } = req.params;
 
@@ -481,6 +511,7 @@ const takedown = async (req, res) => {
 
 module.exports = {
   page_list,
+  page_published,
   page_detail,
   page_layout,
   add,
