@@ -35,7 +35,7 @@ const schedule_list = async (req, res) => {
       schedule_end: 1,
       location: 1,
       quota: 1,
-      lecturer: 1,
+      duration: 1,
       schedule_description: 1,
     }).sort({ schedule_date: 1 });
 
@@ -104,12 +104,13 @@ const add = async (req, res) => {
     schedule_end,
     location,
     quota,
-    lecturer,
+    duration,
     is_assestment,
     benefits,
     skill_level,
     language,
     status,
+    link,
   } = req.body;
 
   try {
@@ -122,12 +123,13 @@ const add = async (req, res) => {
       schedule_end,
       location,
       quota,
-      lecturer,
+      duration,
       is_assestment,
       benefits,
       skill_level,
       language,
       status,
+      link: link || "",
     };
 
     if (req.files) {
@@ -169,10 +171,11 @@ const add_bulk = async (req, res) => {
 
   try {
     Schedule.insertMany(data)
-      .then(() => {
+      .then((insertedSchedules) => {
         res.status(201).json({
           status: 201,
           message: "success",
+          data: insertedSchedules,
         });
       })
       .catch((error) => {
@@ -202,12 +205,13 @@ const adjust = async (req, res) => {
     schedule_end,
     location,
     quota,
-    lecturer,
+    duration,
     is_assestment,
     benefits,
     skill_level,
     language,
     status,
+    link,
   } = req.body;
 
   try {
@@ -220,12 +224,13 @@ const adjust = async (req, res) => {
       schedule_end,
       location,
       quota,
-      lecturer,
+      duration,
       is_assestment,
       benefits,
       skill_level,
       language,
       status,
+      link: link || "",
       updated_at: Date.now(),
     };
 

@@ -27,6 +27,7 @@ const products_scheme = new mongoose.Schema({
     ],
     default: [],
   },
+  link: String,
   duration: Number,
   benefits: {
     type: Array,

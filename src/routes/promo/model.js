@@ -7,6 +7,7 @@ const promos_scheme = new mongoose.Schema({
   promo_description: String,
   percentage: Number,
   end_date: Date,
+  link: String,
   is_active: { type: Boolean, default: false },
   banner: {
     type: Object,

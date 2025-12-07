@@ -7,6 +7,11 @@ const { STATUS } = require("../../config/enum");
 const page_scheme = new mongoose.Schema({
   name: String,
   path: String,
+  type: {
+    type: String,
+    enum: ["Other", "Schedule", "Product", "About Us"],
+    default: "Other",
+  },
   status: {
     type: String,
     enum: [STATUS.DRAFT, STATUS.PUBLISHED],

@@ -107,6 +107,7 @@ const add = async (req, res) => {
     language,
     max_participant,
     duration,
+    link,
   } = req.body;
 
   try {
@@ -119,6 +120,7 @@ const add = async (req, res) => {
       language,
       max_participant,
       duration,
+      link: link || "",
       instructor_list: [],
     };
 
@@ -232,6 +234,7 @@ const adjust = async (req, res) => {
     language,
     max_participant,
     duration,
+    link,
   } = req.body;
 
   let payload = {
@@ -243,6 +246,7 @@ const adjust = async (req, res) => {
     language,
     max_participant,
     duration,
+    link: link || "",
     instructor_list: [],
     updated_at: Date.now(),
   };

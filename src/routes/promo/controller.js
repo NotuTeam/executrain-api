@@ -97,7 +97,7 @@ const promo_active = async (req, res) => {
 };
 
 const add = async (req, res) => {
-  const { promo_name, promo_description, percentage, end_date, is_active } =
+  const { promo_name, promo_description, percentage, end_date, is_active, link } =
     req.body;
 
   try {
@@ -107,6 +107,7 @@ const add = async (req, res) => {
       percentage,
       end_date,
       is_active,
+      link: link || "",
     };
 
     if (req.files) {
@@ -145,7 +146,7 @@ const add = async (req, res) => {
 
 const adjust = async (req, res) => {
   const { id } = req.params;
-  const { promo_name, promo_description, percentage, end_date, is_active } =
+  const { promo_name, promo_description, percentage, end_date, is_active, link } =
     req.body;
 
   let payload = {
@@ -154,6 +155,7 @@ const adjust = async (req, res) => {
     percentage,
     end_date,
     is_active,
+    link: link || "",
     updated_at: Date.now(),
   };
 

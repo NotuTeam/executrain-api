@@ -41,6 +41,7 @@ const page_list = async (req, res) => {
       _id: 1,
       name: 1,
       path: 1,
+      type: 1,
       status: 1,
       created_at: 1,
       updated_at: 1,
@@ -79,6 +80,7 @@ const page_published = async (req, res) => {
         _id: 1,
         name: 1,
         path: 1,
+        type: 1,
         status: 1,
         created_at: 1,
         updated_at: 1,
@@ -158,7 +160,7 @@ const page_layout = async (req, res) => {
 };
 
 const add = async (req, res) => {
-  const { name, path, status, template, metadata } = req.body;
+  const { name, path, type, status, template, metadata } = req.body;
 
   try {
     // Check if path already exists
@@ -233,6 +235,7 @@ const add = async (req, res) => {
     const page = await Page.create({
       name,
       path,
+      type: type || "Other",
       status: status || "draft",
       template: processedTemplate,
       metadata: parsedMetadata,
@@ -254,7 +257,7 @@ const add = async (req, res) => {
 
 const adjust = async (req, res) => {
   const { id } = req.params;
-  const { name, path, status, template, metadata } = req.body;
+  const { name, path, type, status, template, metadata } = req.body;
 
   try {
     // Get existing page
@@ -399,6 +402,7 @@ const adjust = async (req, res) => {
       {
         name,
         path,
+        type: type || "Other",
         status,
         template: processedTemplate,
         metadata: parsedMetadata,

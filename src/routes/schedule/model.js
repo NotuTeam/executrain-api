@@ -13,12 +13,13 @@ const schedule_scheme = new mongoose.Schema({
   schedule_end: String,
   location: String,
   quota: Number,
-  lecturer: Number,
+  duration: Number,
   is_assestment: Boolean,
   benefits: {
     type: Array,
     default: [],
   },
+  link: String,
   skill_level: {
     type: String,
     enum: [

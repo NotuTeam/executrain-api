@@ -13,6 +13,7 @@ const path = require("path");
 const dbConnection = require("./src/config/db.js");
 const { NODE_ENV, PORT, MONGO_URL } = require("./src/config/var.js");
 const routes = require("./src/routes/index");
+const ensureDbConnection = require("./src/middleware/dbGuard");
 
 // Nodemon configuration for hot reload
 if (NODE_ENV !== "production") {
@@ -71,6 +72,9 @@ app.get("/", (_, res) => {
   });
 });
 
+// Middleware untuk ensure DB connection ready
+app.use(ensureDbConnection);
+
 app.use("/api/v1", routes);
 
 app.get("*", (_, res) => {
@@ -80,11 +84,20 @@ app.get("*", (_, res) => {
   });
 });
 
-// Create HTTP server
-const server = createServer(app);
-dbConnection(MONGO_URL);
-
-// Start server
-server.listen(PORT, () => {
-  console.log(`SERVER RUNNING ON PORT ${PORT}`);
+// Initialize database connection
+dbConnection(MONGO_URL).catch((err) => {
+  console.error("Failed to connect to database:", err);
+  process.exit(1);
 });
+
+// Untuk local development: start server dengan listen
+// Untuk Vercel serverless: export app saja
+if (NODE_ENV !== "production") {
+  const server = createServer(app);
+  server.listen(PORT, () => {
+    console.log(`SERVER RUNNING ON PORT ${PORT}`);
+  });
+}
+
+// Export app untuk Vercel serverless
+module.exports = app;
