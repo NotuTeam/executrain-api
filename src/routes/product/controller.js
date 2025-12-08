@@ -38,7 +38,6 @@ const product_list = async (req, res) => {
       skill_level: 1,
       max_participant: 1,
       duration: 1,
-      instructor_list: 1,
       product_description: 1,
       banner: 1,
     })
@@ -121,7 +120,6 @@ const add = async (req, res) => {
       max_participant,
       duration,
       link: link || "",
-      instructor_list: [],
     };
 
     // Handle banner upload
@@ -133,70 +131,6 @@ const add = async (req, res) => {
         public_id: url_public,
         url: url_picture,
       };
-    }
-
-    // Parse instructor_list from FormData
-    const instructorListData = [];
-    let index = 0;
-
-    while (req.body[`instructor_list[${index}][name]`]) {
-      const instructorName = req.body[`instructor_list[${index}][name]`];
-      const instructorPhotoJson = req.body[`instructor_list[${index}][photo]`];
-
-      instructorListData.push({
-        name: instructorName,
-        photoJson: instructorPhotoJson,
-        index: index,
-      });
-      index++;
-    }
-
-    // Handle instructor photos upload
-    const instructorPhotos =
-      req.files && req.files.instructor_photos
-        ? Array.isArray(req.files.instructor_photos)
-          ? req.files.instructor_photos
-          : [req.files.instructor_photos]
-        : [];
-
-    const photoIndexes = req.body.instructor_photo_indexes
-      ? Array.isArray(req.body.instructor_photo_indexes)
-        ? req.body.instructor_photo_indexes
-        : [req.body.instructor_photo_indexes]
-      : [];
-
-    // Process each instructor
-    for (let instructorData of instructorListData) {
-      const photoIndex = photoIndexes.indexOf(instructorData.index.toString());
-
-      if (photoIndex !== -1 && instructorPhotos[photoIndex]) {
-        // Upload new photo
-        const { url_picture, url_public } = await upload(
-          instructorPhotos[photoIndex]
-        );
-        payload.instructor_list.push({
-          name: instructorData.name,
-          photo: {
-            public_id: url_public,
-            url: url_picture,
-          },
-        });
-      } else if (instructorData.photoJson) {
-        // Keep existing photo
-        payload.instructor_list.push({
-          name: instructorData.name,
-          photo: JSON.parse(instructorData.photoJson),
-        });
-      } else {
-        // No photo
-        payload.instructor_list.push({
-          name: instructorData.name,
-          photo: {
-            public_id: "",
-            url: "",
-          },
-        });
-      }
     }
 
     Product.insertOne(payload)
@@ -247,7 +181,6 @@ const adjust = async (req, res) => {
     max_participant,
     duration,
     link: link || "",
-    instructor_list: [],
     updated_at: Date.now(),
   };
 
@@ -263,70 +196,6 @@ const adjust = async (req, res) => {
       };
     } else if (req.body.banner) {
       payload["banner"] = JSON.parse(req.body.banner);
-    }
-
-    // Parse instructor_list from FormData
-    const instructorListData = [];
-    let index = 0;
-
-    while (req.body[`instructor_list[${index}][name]`]) {
-      const instructorName = req.body[`instructor_list[${index}][name]`];
-      const instructorPhotoJson = req.body[`instructor_list[${index}][photo]`];
-
-      instructorListData.push({
-        name: instructorName,
-        photoJson: instructorPhotoJson,
-        index: index,
-      });
-      index++;
-    }
-
-    // Handle instructor photos upload
-    const instructorPhotos =
-      req.files && req.files.instructor_photos
-        ? Array.isArray(req.files.instructor_photos)
-          ? req.files.instructor_photos
-          : [req.files.instructor_photos]
-        : [];
-
-    const photoIndexes = req.body.instructor_photo_indexes
-      ? Array.isArray(req.body.instructor_photo_indexes)
-        ? req.body.instructor_photo_indexes
-        : [req.body.instructor_photo_indexes]
-      : [];
-
-    // Process each instructor
-    for (let instructorData of instructorListData) {
-      const photoIndex = photoIndexes.indexOf(instructorData.index.toString());
-
-      if (photoIndex !== -1 && instructorPhotos[photoIndex]) {
-        // Upload new photo
-        const { url_picture, url_public } = await upload(
-          instructorPhotos[photoIndex]
-        );
-        payload.instructor_list.push({
-          name: instructorData.name,
-          photo: {
-            public_id: url_public,
-            url: url_picture,
-          },
-        });
-      } else if (instructorData.photoJson) {
-        // Keep existing photo
-        payload.instructor_list.push({
-          name: instructorData.name,
-          photo: JSON.parse(instructorData.photoJson),
-        });
-      } else {
-        // No photo
-        payload.instructor_list.push({
-          name: instructorData.name,
-          photo: {
-            public_id: "",
-            url: "",
-          },
-        });
-      }
     }
 
     Product.updateOne({ _id: id }, payload)
