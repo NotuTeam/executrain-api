@@ -2,6 +2,7 @@
 
 const Page = require("./model");
 const { upload, destroy } = require("../../lib/cd");
+const { STATUS } = require("../../config/enum");
 
 const page_list = async (req, res) => {
   try {
@@ -86,8 +87,6 @@ const page_published = async (req, res) => {
         updated_at: 1,
       }
     );
-
-    console.log(pages);
 
     res.status(200).json({
       status: 200,
@@ -236,7 +235,7 @@ const add = async (req, res) => {
       name,
       path,
       type: type || "Other",
-      status: status || "draft",
+      status: status || STATUS.DRAFT,
       template: processedTemplate,
       metadata: parsedMetadata,
     });
@@ -438,7 +437,7 @@ const change_status = async (req, res) => {
     }
 
     // Toggle status
-    const newStatus = page.status === "published" ? "DRAFT" : "PUBLISHED";
+    const newStatus = page.status === STATUS.PUBLISHED ? STATUS.DRAFT : STATUS.PUBLISHED;
 
     // Update status
     await Page.updateOne(
