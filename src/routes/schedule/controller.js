@@ -4,6 +4,8 @@ const Schedule = require("./model");
 
 const { upload, destroy } = require("../../lib/cd");
 
+const { AVAILABILITY, SKILL_LEVELS, LANGUAGES } = require("../../config/enum");
+
 const schedule_list = async (req, res) => {
   try {
     const { search, date } = req.query;
@@ -126,9 +128,12 @@ const add = async (req, res) => {
       duration,
       is_assestment,
       benefits,
-      skill_level,
-      language,
-      status,
+      skill_level:
+        skill_level && skill_level !== "-"
+          ? skill_level
+          : SKILL_LEVELS.BEGINNER,
+      language: language && language !== "-" ? language : LANGUAGES.INDONESIA,
+      status: status && status !== "-" ? status : AVAILABILITY.OPEN_SEAT,
       link: link || "",
     };
 
