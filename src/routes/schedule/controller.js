@@ -174,8 +174,33 @@ const add = async (req, res) => {
 const add_bulk = async (req, res) => {
   const { data } = req.body;
 
+  const payload = data.map((item) => ({
+    schedule_name: item.schedule_name,
+    schedule_description: item.schedule_description,
+    schedule_close_registration_date: item.schedule_close_registration_date,
+    schedule_date: item.schedule_date,
+    schedule_start: item.schedule_start,
+    schedule_end: item.schedule_end,
+    location: item.location,
+    quota: item.quota,
+    duration: item.duration,
+    is_assestment: item.is_assestment,
+    benefits: item.benefits,
+    skill_level:
+      item.skill_level && item.skill_level !== "-"
+        ? item.skill_level
+        : SKILL_LEVELS.BEGINNER,
+    language:
+      item.language && item.language !== "-"
+        ? item.language
+        : LANGUAGES.INDONESIA,
+    status:
+      item.status && item.status !== "-" ? item.status : AVAILABILITY.OPEN_SEAT,
+    link: item.link || "",
+  }));
+
   try {
-    Schedule.insertMany(data)
+    Schedule.insertMany(payload)
       .then((insertedSchedules) => {
         res.status(201).json({
           status: 201,
