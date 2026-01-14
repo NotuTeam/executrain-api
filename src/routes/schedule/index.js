@@ -6,6 +6,9 @@ const {
   add,
   add_bulk,
   schedule_list,
+  schedule_public_list,
+  schedule_home_list,
+  schedule_calendar_list,
   schedule_detail,
   adjust,
   takedown,
@@ -16,7 +19,9 @@ const { islogin } = require("../../middleware/privilege");
 // GET
 schedule.get("/list", islogin, schedule_list);
 schedule.get("/detail/:id", islogin, schedule_detail);
-schedule.get("/public/list", schedule_list);
+schedule.get("/public/list", schedule_public_list);
+schedule.get("/public/home", schedule_home_list);
+schedule.get("/public/calendar", schedule_calendar_list);
 schedule.get("/public/detail/:id", schedule_detail);
 
 // POST
