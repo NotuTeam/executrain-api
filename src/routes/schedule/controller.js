@@ -101,12 +101,15 @@ const schedule_public_list = async (req, res) => {
     }
 
     const upcomingFilter = { ...filter, schedule_date: { $gte: today } };
-    const upcomingSchedules = await Schedule.find(upcomingFilter, projection)
-      .sort({ schedule_date: 1 });
+    const upcomingSchedules = await Schedule.find(
+      upcomingFilter,
+      projection,
+    ).sort({ schedule_date: 1 });
 
     const pastFilter = { ...filter, schedule_date: { $lt: today } };
-    const pastSchedules = await Schedule.find(pastFilter, projection)
-      .sort({ schedule_date: -1 });
+    const pastSchedules = await Schedule.find(pastFilter, projection).sort({
+      schedule_date: -1,
+    });
 
     const allSchedules = [...upcomingSchedules, ...pastSchedules];
     const total_schedules = allSchedules.length;
@@ -158,7 +161,7 @@ const schedule_home_list = async (req, res) => {
         quota: 1,
         duration: 1,
         schedule_description: 1,
-      }
+      },
     )
       .sort({ schedule_date: 1 })
       .limit(limit);
@@ -212,7 +215,7 @@ const schedule_calendar_list = async (req, res) => {
         quota: 1,
         duration: 1,
         schedule_description: 1,
-      }
+      },
     ).sort({ schedule_date: 1 });
 
     res.status(200).json({
@@ -427,13 +430,20 @@ const adjust = async (req, res) => {
       updated_at: Date.now(),
     };
 
-    if (req.files) {
+    if (req.files && req.files.file) {
       const { file } = req.files;
       const { url_picture, url_public } = await upload(file);
 
       payload["banner"] = {
         public_id: url_public,
         url: url_picture,
+      };
+    } else if (req.body.banner && req.body.banner !== "undefined") {
+      payload["banner"] = JSON.parse(req.body.banner);
+    } else {
+      payload["banner"] = {
+        public_id: "",
+        url: "",
       };
     }
 

@@ -12,7 +12,7 @@ const partner_list = async (req, res) => {
         _id: 1,
         partner_name: 1,
         logo: 1,
-      }
+      },
     )
       .then((partners) => {
         res.status(200).json({
@@ -119,13 +119,20 @@ const adjust = async (req, res) => {
   };
 
   try {
-    if (req.files) {
+    if (req.files && req.files.file) {
       const { file } = req.files;
       const { url_picture, url_public } = await upload(file);
 
       payload["logo"] = {
         public_id: url_public,
         url: url_picture,
+      };
+    } else if (req.body.logo && req.body.logo !== "undefined") {
+      payload["logo"] = JSON.parse(req.body.logo);
+    } else {
+      payload["logo"] = {
+        public_id: "",
+        url: "",
       };
     }
 

@@ -16,11 +16,6 @@ const products_scheme = new mongoose.Schema({
   },
   product_category: {
     type: String,
-    enum: [
-      CATEGORIES.IT_TRAINING,
-      CATEGORIES.IT_CONSULTANT,
-      CATEGORIES.IT_SUPPORT,
-    ],
     default: CATEGORIES.IT_TRAINING,
   },
   skill_level: {

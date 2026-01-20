@@ -14,7 +14,7 @@ const testimonial_list = async (req, res) => {
         person_title: 1,
         testimonial: 1,
         photo: 1,
-      }
+      },
     )
       .then((testimonials) => {
         res.status(200).json({
@@ -125,13 +125,20 @@ const adjust = async (req, res) => {
   };
 
   try {
-    if (req.files) {
+    if (req.files && req.files.file) {
       const { file } = req.files;
       const { url_picture, url_public } = await upload(file);
 
       payload["photo"] = {
         public_id: url_public,
         url: url_picture,
+      };
+    } else if (req.body.photo && req.body.photo !== "undefined") {
+      payload["photo"] = JSON.parse(req.body.photo);
+    } else {
+      payload["photo"] = {
+        public_id: "",
+        url: "",
       };
     }
 

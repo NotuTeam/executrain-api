@@ -194,8 +194,13 @@ const adjust = async (req, res) => {
         public_id: url_public,
         url: url_picture,
       };
-    } else if (req.body.banner) {
+    } else if (req.body.banner && req.body.banner !== "undefined") {
       payload["banner"] = JSON.parse(req.body.banner);
+    } else {
+      payload["banner"] = {
+        public_id: "",
+        url: "",
+      };
     }
 
     Product.updateOne({ _id: id }, payload)
@@ -213,6 +218,7 @@ const adjust = async (req, res) => {
         });
       });
   } catch (err) {
+    console.log(err);
     return res.status(404).json({
       status: 404,
       message: "failed to update page",

@@ -97,8 +97,14 @@ const promo_active = async (req, res) => {
 };
 
 const add = async (req, res) => {
-  const { promo_name, promo_description, percentage, end_date, is_active, link } =
-    req.body;
+  const {
+    promo_name,
+    promo_description,
+    percentage,
+    end_date,
+    is_active,
+    link,
+  } = req.body;
 
   try {
     let payload = {
@@ -146,8 +152,14 @@ const add = async (req, res) => {
 
 const adjust = async (req, res) => {
   const { id } = req.params;
-  const { promo_name, promo_description, percentage, end_date, is_active, link } =
-    req.body;
+  const {
+    promo_name,
+    promo_description,
+    percentage,
+    end_date,
+    is_active,
+    link,
+  } = req.body;
 
   let payload = {
     promo_name,
@@ -160,13 +172,20 @@ const adjust = async (req, res) => {
   };
 
   try {
-    if (req.files) {
+    if (req.files && req.files.file) {
       const { file } = req.files;
       const { url_picture, url_public } = await upload(file);
 
       payload["banner"] = {
         public_id: url_public,
         url: url_picture,
+      };
+    } else if (req.body.banner && req.body.banner !== "undefined") {
+      payload["banner"] = JSON.parse(req.body.banner);
+    } else {
+      payload["banner"] = {
+        public_id: "",
+        url: "",
       };
     }
 
