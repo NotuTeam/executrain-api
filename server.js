@@ -99,5 +99,4 @@ if (NODE_ENV !== "production") {
   });
 }
 
-// Export app untuk Vercel serverless
 module.exports = app;
