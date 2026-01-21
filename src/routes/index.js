@@ -13,6 +13,7 @@ const statistic = require("./statistic");
 const service = require("./services");
 const socmed = require("./socmed");
 const metadata = require("./metadata");
+const assets = require("./assets");
 
 routes.use("/auth", auth);
 routes.use("/schedule", schedule);
@@ -25,5 +26,6 @@ routes.use("/stat", statistic);
 routes.use("/service", service);
 routes.use("/socmed", socmed);
 routes.use("/metadata", metadata);
+routes.use("/assets", assets);
 
 module.exports = routes;
