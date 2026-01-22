@@ -246,9 +246,55 @@ const adjust = async (req, res) => {
   }
 };
 
+// Update asset dengan URL langsung (direct upload dari client ke Cloudinary)
+const adjust_url = async (req, res) => {
+  const { id } = req.params;
+  const { url, fallback_url } = req.body;
+
+  try {
+    const asset = await Asset.findById(id);
+
+    if (!asset) {
+      return res.status(404).json({
+        status: 404,
+        message: "Asset not found",
+      });
+    }
+
+    const payload = {
+      updated_at: Date.now(),
+    };
+
+    if (url) {
+      payload.url = url;
+    }
+
+    if (fallback_url) {
+      payload.fallback_url = fallback_url;
+    }
+
+    await Asset.updateOne({ _id: id }, payload);
+
+    const updatedAsset = await Asset.findById(id);
+
+    res.status(200).json({
+      status: 200,
+      message: "Successfully updated asset",
+      data: updatedAsset,
+    });
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({
+      status: 500,
+      message: "Failed to update asset",
+    });
+  }
+};
+
 module.exports = {
   asset_list,
   asset_detail,
   asset_all,
   adjust,
+  adjust_url,
 };

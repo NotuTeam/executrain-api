@@ -2,7 +2,7 @@
 
 const assets = require("express").Router();
 
-const { asset_list, asset_detail, asset_all, adjust } = require("./controller");
+const { asset_list, asset_detail, asset_all, adjust, adjust_url } = require("./controller");
 
 const { islogin } = require("../../middleware/privilege");
 
@@ -13,5 +13,6 @@ assets.get("/detail/:category", asset_detail);
 
 // PUT - protected
 assets.put("/adjust/:id", islogin, adjust);
+assets.put("/adjust-url/:id", islogin, adjust_url);
 
 module.exports = assets;
