@@ -67,7 +67,7 @@ app.use(
 
 app.get("/", (_, res) => {
   res.json({
-    message: "Welcom to Excelearn API",
+    message: "Welcom to Executrain API",
     createdBy: "ayamiyudin",
   });
 });
