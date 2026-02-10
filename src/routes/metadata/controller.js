@@ -87,7 +87,7 @@ const metadata_detail = async (req, res) => {
   }
 };
 
-// POST - Create new metadata
+// POST - Add new metadata
 const add = async (req, res) => {
   try {
     const {

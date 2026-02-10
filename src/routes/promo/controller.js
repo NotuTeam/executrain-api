@@ -3,6 +3,11 @@
 const Promo = require("./model");
 
 const { upload, destroy } = require("../../lib/cd");
+const {
+  deleteImageFromCDN,
+  updateImageWithCleanup,
+  cleanupImagesOnDelete,
+} = require("../../lib/imageManager");
 
 const promo_list = async (req, res) => {
   try {
@@ -161,52 +166,61 @@ const adjust = async (req, res) => {
     link,
   } = req.body;
 
-  let payload = {
-    promo_name,
-    promo_description,
-    percentage,
-    end_date,
-    is_active,
-    link: link || "",
-    updated_at: Date.now(),
-  };
-
   try {
-    if (req.files && req.files.file) {
-      const { file } = req.files;
-      const { url_picture, url_public } = await upload(file);
+    // Get existing promo
+    const existingPromo = await Promo.findById(id);
 
-      payload["banner"] = {
-        public_id: url_public,
-        url: url_picture,
-      };
+    if (!existingPromo) {
+      return res.status(404).json({
+        status: 404,
+        message: "Promo not found",
+      });
+    }
+
+    let payload = {
+      promo_name,
+      promo_description,
+      percentage,
+      end_date,
+      is_active,
+      link: link || "",
+      updated_at: Date.now(),
+    };
+
+    // Handle banner upload with cleanup
+    if (req.files && req.files.file) {
+      // Update image dengan menghapus gambar lama
+      payload.banner = await updateImageWithCleanup(
+        existingPromo,
+        "banner",
+        req.files.file,
+        "promo"
+      );
     } else if (req.body.banner && req.body.banner !== "undefined") {
-      payload["banner"] = JSON.parse(req.body.banner);
+      // Gunakan banner yang ada (tidak ada perubahan)
+      payload.banner = JSON.parse(req.body.banner);
     } else {
-      payload["banner"] = {
+      // Hapus banner
+      if (existingPromo.banner && existingPromo.banner.public_id) {
+        await deleteImageFromCDN(existingPromo.banner.public_id, "promo");
+      }
+      payload.banner = {
         public_id: "",
         url: "",
       };
     }
 
-    Promo.updateOne({ _id: id }, payload)
-      .then((_) => {
-        res.status(200).json({
-          status: 200,
-          message: `successfully update promo ${id}`,
-        });
-      })
-      .catch((error) => {
-        console.log(error);
-        return res.status(400).json({
-          status: 400,
-          message: "promo not found",
-        });
-      });
+    await Promo.updateOne({ _id: id }, payload);
+
+    res.status(200).json({
+      status: 200,
+      message: `successfully update promo ${id}`,
+    });
   } catch (err) {
-    return res.status(404).json({
-      status: 404,
-      message: "failed to update page",
+    console.log(err);
+    return res.status(500).json({
+      status: 500,
+      message: "server error",
     });
   }
 };
@@ -244,20 +258,26 @@ const activate_promo = async (req, res) => {
 const takedown = async (req, res) => {
   const { id } = req.params;
   try {
-    Promo.deleteOne({ _id: id })
-      .then(() => {
-        res.status(200).json({
-          status: 200,
-          message: `successfully takedown promo ${id}`,
-        });
-      })
-      .catch((error) => {
-        console.log(error);
-        return res.status(400).json({
-          status: 400,
-          message: "Promo Not Found",
-        });
+    // Get existing promo before delete
+    const existingPromo = await Promo.findById(id);
+
+    if (!existingPromo) {
+      return res.status(404).json({
+        status: 404,
+        message: "Promo not found",
       });
+    }
+
+    // Cleanup images from CDN
+    await cleanupImagesOnDelete(existingPromo, ["banner"], "promo");
+
+    // Delete from database
+    await Promo.deleteOne({ _id: id });
+
+    res.status(200).json({
+      status: 200,
+      message: `successfully takedown promo ${id}`,
+    });
   } catch (error) {
     console.log(error.message);
     res.status(500).json({

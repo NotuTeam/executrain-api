@@ -8,9 +8,14 @@ const { AVAILABILITY, SKILL_LEVELS, LANGUAGES } = require("../../config/enum");
 
 const schedule_list = async (req, res) => {
   try {
-    const { search, date } = req.query;
+    const { search, date, product_id } = req.query;
 
     let filter = {};
+
+    // Filter by product_id if provided
+    if (product_id) {
+      filter.product_id = product_id;
+    }
 
     // Jika ada pencarian
     if (search) {
@@ -32,7 +37,7 @@ const schedule_list = async (req, res) => {
       schedule_date: 1,
       schedule_close_registration_date: 1,
       status: 1,
-      banner: 1,
+      product_id: 1,
       schedule_start: 1,
       schedule_end: 1,
       location: 1,
@@ -48,6 +53,7 @@ const schedule_list = async (req, res) => {
       filters: {
         search: search || null,
         date: date || null,
+        product_id: product_id || null,
         ...(search && {
           info: "Menampilkan agenda aktif dan akan datang",
         }),
@@ -83,7 +89,7 @@ const schedule_public_list = async (req, res) => {
       schedule_date: 1,
       schedule_close_registration_date: 1,
       status: 1,
-      banner: 1,
+      product_id: 1,
       schedule_start: 1,
       schedule_end: 1,
       location: 1,
@@ -154,7 +160,7 @@ const schedule_home_list = async (req, res) => {
         schedule_date: 1,
         schedule_close_registration_date: 1,
         status: 1,
-        banner: 1,
+        product_id: 1,
         schedule_start: 1,
         schedule_end: 1,
         location: 1,
@@ -208,7 +214,7 @@ const schedule_calendar_list = async (req, res) => {
         schedule_date: 1,
         schedule_close_registration_date: 1,
         status: 1,
-        banner: 1,
+        product_id: 1,
         schedule_start: 1,
         schedule_end: 1,
         location: 1,
@@ -279,6 +285,7 @@ const add = async (req, res) => {
     language,
     status,
     link,
+    product_id,
   } = req.body;
 
   try {
@@ -301,17 +308,8 @@ const add = async (req, res) => {
       language: language && language !== "-" ? language : LANGUAGES.INDONESIA,
       status: status && status !== "-" ? status : AVAILABILITY.OPEN_SEAT,
       link: link || "",
+      product_id,
     };
-
-    if (req.files) {
-      const { file } = req.files;
-      const { url_picture, url_public } = await upload(file);
-
-      payload["banner"] = {
-        public_id: url_public,
-        url: url_picture,
-      };
-    }
 
     Schedule.insertOne(payload)
       .then((schedule) => {
@@ -338,7 +336,14 @@ const add = async (req, res) => {
 };
 
 const add_bulk = async (req, res) => {
-  const { data } = req.body;
+  const { data, product_id } = req.body;
+
+  if (!product_id) {
+    return res.status(400).json({
+      status: 400,
+      message: "product_id is required for bulk schedule creation",
+    });
+  }
 
   const payload = data.map((item) => ({
     schedule_name: item.schedule_name,
@@ -363,6 +368,7 @@ const add_bulk = async (req, res) => {
     status:
       item.status && item.status !== "-" ? item.status : AVAILABILITY.OPEN_SEAT,
     link: item.link || "",
+    product_id,
   }));
 
   try {
@@ -408,6 +414,7 @@ const adjust = async (req, res) => {
     language,
     status,
     link,
+    product_id,
   } = req.body;
 
   try {
@@ -427,25 +434,9 @@ const adjust = async (req, res) => {
       language,
       status,
       link: link || "",
+      product_id,
       updated_at: Date.now(),
     };
-
-    if (req.files && req.files.file) {
-      const { file } = req.files;
-      const { url_picture, url_public } = await upload(file);
-
-      payload["banner"] = {
-        public_id: url_public,
-        url: url_picture,
-      };
-    } else if (req.body.banner && req.body.banner !== "undefined") {
-      payload["banner"] = JSON.parse(req.body.banner);
-    } else {
-      payload["banner"] = {
-        public_id: "",
-        url: "",
-      };
-    }
 
     Schedule.updateOne({ _id: id }, payload)
       .then((_) => {

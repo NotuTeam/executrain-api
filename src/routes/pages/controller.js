@@ -132,8 +132,6 @@ const page_detail = async (req, res) => {
 const page_layout = async (req, res) => {
   const { path } = req.params;
 
-  console.log(path);
-
   try {
     const page = await Page.findOne({ path, status: "PUBLISHED" });
 

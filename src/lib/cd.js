@@ -25,7 +25,7 @@ async function upload(file) {
       ? "/tmp" // Vercel's writable directory
       : path.join(__dirname, "..", "temp"); // Local development
 
-    // Create temp directory if it doesn't exist (local only)
+    // Add temp directory if it doesn't exist (local only)
     if (!isVercel && !fs.existsSync(tempDir)) {
       fs.mkdirSync(tempDir, { recursive: true });
     }

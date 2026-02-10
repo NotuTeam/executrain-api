@@ -342,15 +342,19 @@ const adjust = async (req, res) => {
   const { username = null, display_name = null, password = null } = req.body;
 
   try {
-    let new_password = "";
-    if (password) {
-      new_password = await encrpyt_one_way(password);
+    // Build update object dynamically
+    const updateData = {
+      username,
+      display_name,
+      updated_at: Date.now(),
+    };
+
+    // Only update password if it's provided and not empty
+    if (password && password.trim() !== "") {
+      updateData.password = await encrpyt_one_way(password);
     }
 
-    User.updateOne(
-      { _id: id },
-      { username, display_name, password: new_password, updated_at: Date.now() }
-    )
+    User.updateOne({ _id: id }, { $set: updateData })
       .then((_) => {
         res.status(200).json({
           status: 200,

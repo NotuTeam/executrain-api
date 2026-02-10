@@ -12,6 +12,7 @@ const service_list = async (req, res) => {
         _id: 1,
         service_name: 1,
         service_description: 1,
+        slug: 1,
         logo: 1,
       },
     )

@@ -3,6 +3,11 @@
 const Product = require("./model");
 
 const { upload, destroy } = require("../../lib/cd");
+const {
+  deleteImageFromCDN,
+  updateImageWithCleanup,
+  cleanupImagesOnDelete,
+} = require("../../lib/imageManager");
 
 const product_list = async (req, res) => {
   try {
@@ -171,57 +176,64 @@ const adjust = async (req, res) => {
     link,
   } = req.body;
 
-  let payload = {
-    product_name,
-    product_description,
-    product_category,
-    benefits,
-    skill_level,
-    language,
-    max_participant,
-    duration,
-    link: link || "",
-    updated_at: Date.now(),
-  };
-
   try {
-    // Handle banner upload
-    if (req.files && req.files.file) {
-      const { file } = req.files;
-      const { url_picture, url_public } = await upload(file);
+    // Get existing product
+    const existingProduct = await Product.findById(id);
 
-      payload["banner"] = {
-        public_id: url_public,
-        url: url_picture,
-      };
+    if (!existingProduct) {
+      return res.status(404).json({
+        status: 404,
+        message: "Product not found",
+      });
+    }
+
+    let payload = {
+      product_name,
+      product_description,
+      product_category,
+      benefits,
+      skill_level,
+      language,
+      max_participant,
+      duration,
+      link: link || "",
+      updated_at: Date.now(),
+    };
+
+    // Handle banner upload with cleanup
+    if (req.files && req.files.file) {
+      // Update image dengan menghapus gambar lama
+      payload.banner = await updateImageWithCleanup(
+        existingProduct,
+        "banner",
+        req.files.file,
+        "product"
+      );
     } else if (req.body.banner && req.body.banner !== "undefined") {
-      payload["banner"] = JSON.parse(req.body.banner);
+      // Gunakan banner yang ada (tidak ada perubahan)
+      payload.banner = JSON.parse(req.body.banner);
     } else {
-      payload["banner"] = {
+      // Hapus banner
+      if (existingProduct.banner && existingProduct.banner.public_id) {
+        await deleteImageFromCDN(existingProduct.banner.public_id, "product");
+      }
+      payload.banner = {
         public_id: "",
         url: "",
       };
     }
 
-    Product.updateOne({ _id: id }, payload)
-      .then((_) => {
-        res.status(200).json({
-          status: 200,
-          message: `successfully update product ${id}`,
-        });
-      })
-      .catch((error) => {
-        console.log(error);
-        return res.status(400).json({
-          status: 400,
-          message: "product not found",
-        });
-      });
+    await Product.updateOne({ _id: id }, payload);
+
+    res.status(200).json({
+      status: 200,
+      message: `successfully update product ${id}`,
+    });
   } catch (err) {
     console.log(err);
-    return res.status(404).json({
-      status: 404,
-      message: "failed to update page",
+    return res.status(500).json({
+      status: 500,
+      message: "server error",
     });
   }
 };
@@ -230,20 +242,31 @@ module.exports = { add, adjust };
 const takedown = async (req, res) => {
   const { id } = req.params;
   try {
-    Product.deleteOne({ _id: id })
-      .then(() => {
-        res.status(200).json({
-          status: 200,
-          message: `successfully takedown product ${id}`,
-        });
-      })
-      .catch((error) => {
-        console.log(error);
-        return res.status(400).json({
-          status: 400,
-          message: "Product Not Found",
-        });
+    // Get existing product before delete
+    const existingProduct = await Product.findById(id);
+
+    if (!existingProduct) {
+      return res.status(404).json({
+        status: 404,
+        message: "Product not found",
       });
+    }
+
+    // Cleanup images from CDN
+    await cleanupImagesOnDelete(existingProduct, ["banner"], "product");
+
+    // Delete all schedules related to this product
+    const Schedule = require("../schedule/model");
+    const deletedSchedules = await Schedule.deleteMany({ product_id: id });
+    console.log(`Deleted ${deletedSchedules.deletedCount} schedules related to product ${id}`);
+
+    // Delete from database
+    await Product.deleteOne({ _id: id });
+
+    res.status(200).json({
+      status: 200,
+      message: `successfully takedown product ${id} and ${deletedSchedules.deletedCount} related schedules`,
+    });
   } catch (error) {
     console.log(error.message);
     res.status(500).json({

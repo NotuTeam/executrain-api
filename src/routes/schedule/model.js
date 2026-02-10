@@ -39,12 +39,11 @@ const schedule_scheme = new mongoose.Schema({
     enum: [AVAILABILITY.FULL_BOOKED, AVAILABILITY.OPEN_SEAT],
     default: AVAILABILITY.OPEN_SEAT,
   },
-  banner: {
-    type: Object,
-    default: {
-      public_id: "",
-      url: "",
-    },
+  // Link schedule to product
+  product_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Product",
+    required: true,
   },
   updated_at: {
     type: Date,
