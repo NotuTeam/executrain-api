@@ -2,8 +2,6 @@
 
 const Career = require("./model");
 
-const { upload, destroy } = require("../../lib/cd");
-
 const career_list = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -168,17 +166,15 @@ const add = async (req, res) => {
     title,
     description,
     requirements,
-    responsibilities,
-    benefits,
-    department,
+    experiance_requirement,
+    applicant_question,
     location,
     job_type,
     experience_level,
     salary_min,
     salary_max,
-    salary_currency,
     vacancies,
-    application_deadline,
+    status,
   } = req.body;
 
   try {
@@ -188,34 +184,27 @@ const add = async (req, res) => {
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-+|-+$/g, "");
 
+    // Ensure array fields are always arrays
+    const requirementsArray = Array.isArray(requirements) ? requirements : requirements ? [requirements] : [];
+    const experianceArray = Array.isArray(experiance_requirement) ? experiance_requirement : experiance_requirement ? [experiance_requirement] : [];
+    const applicantArray = Array.isArray(applicant_question) ? applicant_question : applicant_question ? [applicant_question] : [];
+    const descriptionArray = Array.isArray(description) ? description : description ? [description] : [];
+
     let payload = {
       title,
       slug,
-      description,
-      requirements: requirements || [],
-      responsibilities: responsibilities || [],
-      benefits: benefits || [],
-      department,
+      description: descriptionArray.filter(d => d && d.trim()),
+      requirements: requirementsArray.filter(r => r && r.trim()),
+      experiance_requirement: experianceArray.filter(e => e && e.trim()),
+      applicant_question: applicantArray.filter(q => q && q.trim()),
       location,
       job_type,
       experience_level,
       salary_min,
       salary_max,
-      salary_currency: salary_currency || "IDR",
       vacancies: vacancies || 1,
-      application_deadline,
+      status: status || "PUBLISHED", // Default ke PUBLISHED
     };
-
-    // Handle featured image upload
-    if (req.files && req.files.file) {
-      const { file } = req.files;
-      const { url_picture, url_public } = await upload(file);
-
-      payload.featured_image = {
-        public_id: url_public,
-        url: url_picture,
-      };
-    }
 
     const career = await Career.create(payload);
 
@@ -239,35 +228,35 @@ const adjust = async (req, res) => {
     title,
     description,
     requirements,
-    responsibilities,
-    benefits,
-    department,
+    experiance_requirement,
+    applicant_question,
     location,
     job_type,
     experience_level,
     salary_min,
     salary_max,
-    salary_currency,
     vacancies,
-    application_deadline,
     status,
   } = req.body;
 
   try {
+    // Ensure array fields are always arrays
+    const requirementsArray = Array.isArray(requirements) ? requirements : requirements ? [requirements] : [];
+    const experianceArray = Array.isArray(experiance_requirement) ? experiance_requirement : experiance_requirement ? [experiance_requirement] : [];
+    const applicantArray = Array.isArray(applicant_question) ? applicant_question : applicant_question ? [applicant_question] : [];
+    const descriptionArray = Array.isArray(description) ? description : [];
+
     let payload = {
-      description,
-      requirements,
-      responsibilities,
-      benefits,
-      department,
+      description: descriptionArray,
+      requirements: requirementsArray.filter(r => r && r.trim()),
+      experiance_requirement: experianceArray.filter(e => e && e.trim()),
+      applicant_question: applicantArray.filter(q => q && q.trim()),
       location,
       job_type,
       experience_level,
       salary_min,
       salary_max,
-      salary_currency,
       vacancies,
-      application_deadline,
       status,
       updated_at: Date.now(),
     };
@@ -280,19 +269,6 @@ const adjust = async (req, res) => {
         .replace(/^-+|-+$/g, "");
       payload.title = title;
       payload.slug = slug;
-    }
-
-    // Handle featured image upload
-    if (req.files && req.files.file) {
-      const { file } = req.files;
-      const { url_picture, url_public } = await upload(file);
-
-      payload.featured_image = {
-        public_id: url_public,
-        url: url_picture,
-      };
-    } else if (req.body.featured_image && req.body.featured_image !== "undefined") {
-      payload.featured_image = JSON.parse(req.body.featured_image);
     }
 
     const career = await Career.findByIdAndUpdate(id, payload, { new: true });
@@ -328,11 +304,6 @@ const takedown = async (req, res) => {
         status: 404,
         message: "Career not found",
       });
-    }
-
-    // Destroy featured image if exists
-    if (career.featured_image && career.featured_image.public_id) {
-      await destroy(career.featured_image.public_id);
     }
 
     res.status(200).json({

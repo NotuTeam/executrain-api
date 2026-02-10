@@ -54,10 +54,6 @@ const career_schema = new mongoose.Schema({
   salary_max: {
     type: Number,
   },
-  salary_currency: {
-    type: String,
-    default: "IDR",
-  },
   vacancies: {
     type: Number,
     default: 1,
