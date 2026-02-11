@@ -1,10 +1,50 @@
 /** @format */
 
 const Schedule = require("./model");
+const Product = require("../product/model");
 
 const { upload, destroy } = require("../../lib/cd");
 
-const { AVAILABILITY, SKILL_LEVELS, LANGUAGES } = require("../../config/enum");
+const { AVAILABILITY } = require("../../config/enum");
+
+// Helper function to merge product data into schedule
+const mergeProductData = async (schedules) => {
+  if (!schedules || schedules.length === 0) return schedules;
+
+  // Get all unique product IDs
+  const productIds = [...new Set(schedules.map(s => s.product_id))];
+
+  // Fetch all products in one query
+  const products = await Product.find({
+    _id: { $in: productIds }
+  });
+
+  // Create product map for quick lookup
+  const productMap = {};
+  products.forEach(p => {
+    productMap[p._id.toString()] = p;
+  });
+
+  // Merge product data into each schedule
+  return schedules.map(schedule => {
+    const product = productMap[schedule.product_id?.toString() || schedule.product_id];
+    if (product) {
+      return {
+        ...schedule.toObject(),
+        benefits: product.benefits || [],
+        link: product.link || "",
+        skill_level: product.skill_level || "",
+        language: product.language || "",
+        product_name: product.product_name || "",
+        product_banner: product.banner || null,
+        product_description: product.product_description || "",
+        product_link: product.link || "",
+        product_category: product.product_category || ""
+      };
+    }
+    return schedule;
+  });
+};
 
 const schedule_list = async (req, res) => {
   try {
@@ -44,12 +84,16 @@ const schedule_list = async (req, res) => {
       quota: 1,
       duration: 1,
       schedule_description: 1,
-    }).sort({ schedule_date: 1 });
+    })
+      .sort({ schedule_date: 1 });
+
+    // Merge product data into schedules
+    const schedulesWithProductData = await mergeProductData(schedules);
 
     res.status(200).json({
       status: 200,
       message: "success",
-      data: schedules,
+      data: schedulesWithProductData,
       filters: {
         search: search || null,
         date: date || null,
@@ -110,17 +154,23 @@ const schedule_public_list = async (req, res) => {
     const upcomingSchedules = await Schedule.find(
       upcomingFilter,
       projection,
-    ).sort({ schedule_date: 1 });
+    )
+      .sort({ schedule_date: 1 });
 
     const pastFilter = { ...filter, schedule_date: { $lt: today } };
-    const pastSchedules = await Schedule.find(pastFilter, projection).sort({
-      schedule_date: -1,
-    });
+    const pastSchedules = await Schedule.find(pastFilter, projection)
+      .sort({
+        schedule_date: -1,
+      });
 
     const allSchedules = [...upcomingSchedules, ...pastSchedules];
-    const total_schedules = allSchedules.length;
+
+    // Merge product data into schedules
+    const schedulesWithProductData = await mergeProductData(allSchedules);
+
+    const total_schedules = schedulesWithProductData.length;
     const total_pages = Math.ceil(total_schedules / limit);
-    const paginatedSchedules = allSchedules.slice(skip, skip + limit);
+    const paginatedSchedules = schedulesWithProductData.slice(skip, skip + limit);
 
     res.status(200).json({
       status: 200,
@@ -172,10 +222,13 @@ const schedule_home_list = async (req, res) => {
       .sort({ schedule_date: 1 })
       .limit(limit);
 
+    // Merge product data into schedules
+    const schedulesWithProductData = await mergeProductData(schedules);
+
     res.status(200).json({
       status: 200,
       message: "success",
-      data: schedules,
+      data: schedulesWithProductData,
     });
   } catch (error) {
     console.log(error.message);
@@ -222,12 +275,16 @@ const schedule_calendar_list = async (req, res) => {
         duration: 1,
         schedule_description: 1,
       },
-    ).sort({ schedule_date: 1 });
+    )
+      .sort({ schedule_date: 1 });
+
+    // Merge product data into schedules
+    const schedulesWithProductData = await mergeProductData(schedules);
 
     res.status(200).json({
       status: 200,
       message: "success",
-      data: schedules,
+      data: schedulesWithProductData,
     });
   } catch (error) {
     console.log(error.message);
@@ -243,22 +300,24 @@ const schedule_detail = async (req, res) => {
   const { id } = req.params;
 
   try {
-    Schedule.findOne({ _id: id })
-      .then((schedule) => {
-        res.status(200).json({
-          status: 200,
-          message: "success",
-          data: schedule,
-        });
-      })
-      .catch((error) => {
-        console.log(error);
-        res.status(200).json({
-          status: 200,
-          data: [],
-          message: "No Schedule Found",
-        });
+    const schedule = await Schedule.findOne({ _id: id });
+
+    if (!schedule) {
+      return res.status(200).json({
+        status: 200,
+        data: [],
+        message: "No Schedule Found",
       });
+    }
+
+    // Merge product data into schedule
+    const schedulesWithProductData = await mergeProductData([schedule]);
+
+    res.status(200).json({
+      status: 200,
+      message: "success",
+      data: schedulesWithProductData[0],
+    });
   } catch (error) {
     console.log(error.message);
     res.status(404).json({
@@ -280,11 +339,7 @@ const add = async (req, res) => {
     quota,
     duration,
     is_assestment,
-    benefits,
-    skill_level,
-    language,
     status,
-    link,
     product_id,
   } = req.body;
 
@@ -300,14 +355,7 @@ const add = async (req, res) => {
       quota,
       duration,
       is_assestment,
-      benefits,
-      skill_level:
-        skill_level && skill_level !== "-"
-          ? skill_level
-          : SKILL_LEVELS.BEGINNER,
-      language: language && language !== "-" ? language : LANGUAGES.INDONESIA,
       status: status && status !== "-" ? status : AVAILABILITY.OPEN_SEAT,
-      link: link || "",
       product_id,
     };
 
@@ -356,18 +404,8 @@ const add_bulk = async (req, res) => {
     quota: item.quota,
     duration: item.duration,
     is_assestment: item.is_assestment,
-    benefits: item.benefits,
-    skill_level:
-      item.skill_level && item.skill_level !== "-"
-        ? item.skill_level
-        : SKILL_LEVELS.BEGINNER,
-    language:
-      item.language && item.language !== "-"
-        ? item.language
-        : LANGUAGES.INDONESIA,
     status:
       item.status && item.status !== "-" ? item.status : AVAILABILITY.OPEN_SEAT,
-    link: item.link || "",
     product_id,
   }));
 
@@ -409,11 +447,7 @@ const adjust = async (req, res) => {
     quota,
     duration,
     is_assestment,
-    benefits,
-    skill_level,
-    language,
     status,
-    link,
     product_id,
   } = req.body;
 
@@ -429,11 +463,7 @@ const adjust = async (req, res) => {
       quota,
       duration,
       is_assestment,
-      benefits,
-      skill_level,
-      language,
       status,
-      link: link || "",
       product_id,
       updated_at: Date.now(),
     };

@@ -2,7 +2,7 @@
 
 const mongoose = require("mongoose");
 
-const { AVAILABILITY, SKILL_LEVELS, LANGUAGES } = require("../../config/enum");
+const { AVAILABILITY } = require("../../config/enum");
 
 const schedule_scheme = new mongoose.Schema({
   schedule_name: String,
@@ -15,25 +15,6 @@ const schedule_scheme = new mongoose.Schema({
   quota: Number,
   duration: Number,
   is_assestment: Boolean,
-  benefits: {
-    type: Array,
-    default: [],
-  },
-  link: String,
-  skill_level: {
-    type: String,
-    enum: [
-      SKILL_LEVELS.BEGINNER,
-      SKILL_LEVELS.INTERMEDIATE,
-      SKILL_LEVELS.EXPERT,
-    ],
-    default: SKILL_LEVELS.BEGINNER,
-  },
-  language: {
-    type: String,
-    enum: [LANGUAGES.INDONESIA, LANGUAGES.INGGRIS],
-    default: LANGUAGES.INDONESIA,
-  },
   status: {
     type: String,
     enum: [AVAILABILITY.FULL_BOOKED, AVAILABILITY.OPEN_SEAT],
