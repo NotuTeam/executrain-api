@@ -5,6 +5,7 @@ const article = require("express").Router();
 const {
   add,
   article_list,
+  article_latest,
   article_detail,
   article_by_slug,
   adjust,
@@ -17,6 +18,7 @@ const { islogin } = require("../../middleware/privilege");
 article.get("/list", islogin, article_list);
 article.get("/detail/:id", islogin, article_detail);
 article.get("/public/list", article_list);
+article.get("/public/latest", article_latest);
 article.get("/public/detail/:id", article_detail);
 article.get("/public/slug/:slug", article_by_slug);
 

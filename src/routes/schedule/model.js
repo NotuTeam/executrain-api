@@ -7,6 +7,7 @@ const { AVAILABILITY } = require("../../config/enum");
 const schedule_scheme = new mongoose.Schema({
   schedule_name: String,
   schedule_description: String,
+  schedule_category: String,
   schedule_date: Date,
   schedule_close_registration_date: Date,
   schedule_start: String,

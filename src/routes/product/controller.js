@@ -15,14 +15,14 @@ const product_list = async (req, res) => {
     const limit = 3;
     const skip = (page - 1) * limit;
 
-    const product_category = req.query.product_category;
+    const product_category = req.query.product_category
     const sort_order = req.query.sort_order || "desc";
     const product_name = req.query.product_name;
 
     const filter = {};
 
     if (product_category) {
-      filter.product_category = product_category;
+      filter.product_category = product_category.toLowerCase();
     }
 
     if (product_name) {
@@ -45,6 +45,8 @@ const product_list = async (req, res) => {
       duration: 1,
       product_description: 1,
       banner: 1,
+      learning_path_banner: 1,
+      learning_path_redirect_url: 1,
     })
       .sort(sort)
       .skip(skip)
@@ -112,6 +114,7 @@ const add = async (req, res) => {
     max_participant,
     duration,
     link,
+    learning_path_redirect_url,
   } = req.body;
 
   try {
@@ -125,6 +128,7 @@ const add = async (req, res) => {
       max_participant,
       duration,
       link: link || "",
+      learning_path_redirect_url: learning_path_redirect_url || "",
     };
 
     // Handle banner upload
@@ -133,6 +137,17 @@ const add = async (req, res) => {
       const { url_picture, url_public } = await upload(file);
 
       payload["banner"] = {
+        public_id: url_public,
+        url: url_picture,
+      };
+    }
+
+    // Handle learning path banner upload
+    if (req.files && req.files.learning_path_banner_file) {
+      const { learning_path_banner_file } = req.files;
+      const { url_picture, url_public } = await upload(learning_path_banner_file);
+
+      payload["learning_path_banner"] = {
         public_id: url_public,
         url: url_picture,
       };
@@ -174,6 +189,7 @@ const adjust = async (req, res) => {
     max_participant,
     duration,
     link,
+    learning_path_redirect_url,
   } = req.body;
 
   try {
@@ -197,6 +213,7 @@ const adjust = async (req, res) => {
       max_participant,
       duration,
       link: link || "",
+      learning_path_redirect_url: learning_path_redirect_url || "",
       updated_at: Date.now(),
     };
 
@@ -223,6 +240,35 @@ const adjust = async (req, res) => {
       };
     }
 
+    // Handle learning path banner upload with cleanup
+    if (req.files && req.files.learning_path_banner_file) {
+      payload.learning_path_banner = await updateImageWithCleanup(
+        existingProduct,
+        "learning_path_banner",
+        req.files.learning_path_banner_file,
+        "product"
+      );
+    } else if (
+      req.body.learning_path_banner &&
+      req.body.learning_path_banner !== "undefined"
+    ) {
+      payload.learning_path_banner = JSON.parse(req.body.learning_path_banner);
+    } else {
+      if (
+        existingProduct.learning_path_banner &&
+        existingProduct.learning_path_banner.public_id
+      ) {
+        await deleteImageFromCDN(
+          existingProduct.learning_path_banner.public_id,
+          "product"
+        );
+      }
+      payload.learning_path_banner = {
+        public_id: "",
+        url: "",
+      };
+    }
+
     await Product.updateOne({ _id: id }, payload);
 
     res.status(200).json({
@@ -238,7 +284,6 @@ const adjust = async (req, res) => {
   }
 };
 
-module.exports = { add, adjust };
 const takedown = async (req, res) => {
   const { id } = req.params;
   try {
@@ -253,7 +298,11 @@ const takedown = async (req, res) => {
     }
 
     // Cleanup images from CDN
-    await cleanupImagesOnDelete(existingProduct, ["banner"], "product");
+    await cleanupImagesOnDelete(
+      existingProduct,
+      ["banner", "learning_path_banner"],
+      "product"
+    );
 
     // Delete all schedules related to this product
     const Schedule = require("../schedule/model");

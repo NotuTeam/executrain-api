@@ -38,6 +38,10 @@ const career_schema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  department: {
+    type: String,
+    default: "",
+  },
   job_type: {
     type: String,
     enum: Object.values(JOB_TYPE),
@@ -57,6 +61,13 @@ const career_schema = new mongoose.Schema({
   vacancies: {
     type: Number,
     default: 1,
+  },
+  contact_email: {
+    type: String,
+    default: "",
+  },
+  deadline: {
+    type: Date,
   },
   status: {
     type: String,

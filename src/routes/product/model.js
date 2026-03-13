@@ -39,6 +39,17 @@ const products_scheme = new mongoose.Schema({
       url: "",
     },
   },
+  learning_path_banner: {
+    type: Object,
+    default: {
+      public_id: "",
+      url: "",
+    },
+  },
+  learning_path_redirect_url: {
+    type: String,
+    default: "",
+  },
   updated_at: {
     type: Date,
     default: new Date(),

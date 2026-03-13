@@ -17,6 +17,7 @@ const article_list = async (req, res) => {
     const search = req.query.search;
     const tag = req.query.tag;
 
+    const sortDirection = sort_order === "asc" ? 1 : -1;
     const filter = {};
 
     // For public endpoints, only show published articles
@@ -43,7 +44,9 @@ const article_list = async (req, res) => {
     }
 
     const sort = {
-      created_at: sort_order === "asc" ? 1 : -1,
+      published_at: sortDirection,
+      created_at: sortDirection,
+      _id: sortDirection,
     };
 
     const total_articles = await Article.countDocuments(filter);
@@ -78,6 +81,43 @@ const article_list = async (req, res) => {
         has_next: page < total_pages,
         has_prev: page > 1,
       },
+    });
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({
+      status: 500,
+      message: "server error",
+    });
+  }
+};
+
+const article_latest = async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 5;
+
+    const articles = await Article.find(
+      { status: "PUBLISHED" },
+      {
+        _id: 1,
+        title: 1,
+        slug: 1,
+        excerpt: 1,
+        author: 1,
+        tags: 1,
+        featured_image: 1,
+        status: 1,
+        views: 1,
+        published_at: 1,
+        created_at: 1,
+      }
+    )
+      .sort({ published_at: -1, created_at: -1, _id: -1 })
+      .limit(limit);
+
+    res.status(200).json({
+      status: 200,
+      message: "success",
+      data: articles,
     });
   } catch (error) {
     console.log(error.message);
@@ -378,6 +418,7 @@ const takedown = async (req, res) => {
 module.exports = {
   add,
   article_list,
+  article_latest,
   article_detail,
   article_by_slug,
   adjust,

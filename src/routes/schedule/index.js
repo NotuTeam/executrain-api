@@ -8,7 +8,9 @@ const {
   schedule_list,
   schedule_public_list,
   schedule_home_list,
+  schedule_by_product,
   schedule_calendar_list,
+  schedule_categories,
   schedule_detail,
   adjust,
   takedown,
@@ -21,6 +23,8 @@ schedule.get("/list", islogin, schedule_list);
 schedule.get("/detail/:id", islogin, schedule_detail);
 schedule.get("/public/list", schedule_public_list);
 schedule.get("/public/home", schedule_home_list);
+schedule.get("/public/categories", schedule_categories);
+schedule.get("/public/product/:product_id", schedule_by_product);
 schedule.get("/public/calendar", schedule_calendar_list);
 schedule.get("/public/detail/:id", schedule_detail);
 

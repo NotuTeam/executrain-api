@@ -31,6 +31,7 @@ const mergeProductData = async (schedules) => {
     if (product) {
       return {
         ...schedule.toObject(),
+        schedule_description: product.product_description || "",
         benefits: product.benefits || [],
         link: product.link || "",
         skill_level: product.skill_level || "",
@@ -48,13 +49,29 @@ const mergeProductData = async (schedules) => {
 
 const schedule_list = async (req, res) => {
   try {
-    const { search, date, product_id } = req.query;
+    const { search, date, product_id, schedule_category, product_category } = req.query;
 
     let filter = {};
 
     // Filter by product_id if provided
     if (product_id) {
       filter.product_id = product_id;
+    }
+
+    // Filter by schedule_category if provided (supports multiple values)
+    if (schedule_category) {
+      const scheduleCategories = Array.isArray(schedule_category)
+        ? schedule_category
+        : schedule_category
+            .split(",")
+            .map((cat) => cat.trim())
+            .filter((cat) => cat !== "");
+
+      if (scheduleCategories.length > 0) {
+        filter.schedule_category = {
+          $in: scheduleCategories,
+        };
+      }
     }
 
     // Jika ada pencarian
@@ -84,11 +101,19 @@ const schedule_list = async (req, res) => {
       quota: 1,
       duration: 1,
       schedule_description: 1,
+      schedule_category: 1,
     })
       .sort({ schedule_date: 1 });
 
     // Merge product data into schedules
-    const schedulesWithProductData = await mergeProductData(schedules);
+    let schedulesWithProductData = await mergeProductData(schedules);
+
+    // Filter by product_category if provided (after merging product data)
+    if (product_category) {
+      schedulesWithProductData = schedulesWithProductData.filter(
+        schedule => schedule.product_category === product_category
+      );
+    }
 
     res.status(200).json({
       status: 200,
@@ -98,6 +123,8 @@ const schedule_list = async (req, res) => {
         search: search || null,
         date: date || null,
         product_id: product_id || null,
+        schedule_category: schedule_category || null,
+        product_category: product_category || null,
         ...(search && {
           info: "Menampilkan agenda aktif dan akan datang",
         }),
@@ -122,7 +149,7 @@ const schedule_public_list = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 6;
     const skip = (page - 1) * limit;
-    const { search } = req.query;
+    const { search, schedule_category, product_category } = req.query;
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -140,6 +167,7 @@ const schedule_public_list = async (req, res) => {
       quota: 1,
       duration: 1,
       schedule_description: 1,
+      schedule_category: 1,
     };
 
     let filter = {};
@@ -148,6 +176,22 @@ const schedule_public_list = async (req, res) => {
         $regex: search,
         $options: "i",
       };
+    }
+
+    // Filter by schedule_category if provided (supports multiple values)
+    if (schedule_category) {
+      const scheduleCategories = Array.isArray(schedule_category)
+        ? schedule_category
+        : schedule_category
+            .split(",")
+            .map((cat) => cat.trim())
+            .filter((cat) => cat !== "");
+
+      if (scheduleCategories.length > 0) {
+        filter.schedule_category = {
+          $in: scheduleCategories,
+        };
+      }
     }
 
     const upcomingFilter = { ...filter, schedule_date: { $gte: today } };
@@ -166,7 +210,14 @@ const schedule_public_list = async (req, res) => {
     const allSchedules = [...upcomingSchedules, ...pastSchedules];
 
     // Merge product data into schedules
-    const schedulesWithProductData = await mergeProductData(allSchedules);
+    let schedulesWithProductData = await mergeProductData(allSchedules);
+
+    // Filter by product_category if provided (after merging product data)
+    if (product_category) {
+      schedulesWithProductData = schedulesWithProductData.filter(
+        schedule => schedule.product_category === product_category
+      );
+    }
 
     const total_schedules = schedulesWithProductData.length;
     const total_pages = Math.ceil(total_schedules / limit);
@@ -217,6 +268,64 @@ const schedule_home_list = async (req, res) => {
         quota: 1,
         duration: 1,
         schedule_description: 1,
+        schedule_category: 1,
+      },
+    )
+      .sort({ schedule_date: 1 })
+      .limit(limit);
+
+    // Merge product data into schedules
+    const schedulesWithProductData = await mergeProductData(schedules);
+
+    res.status(200).json({
+      status: 200,
+      message: "success",
+      data: schedulesWithProductData,
+    });
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({
+      status: 500,
+      message: "server error",
+      error: error.message,
+    });
+  }
+};
+
+const schedule_by_product = async (req, res) => {
+  try {
+    const { product_id } = req.params;
+    const limit = parseInt(req.query.limit) || 3;
+
+    if (!product_id) {
+      return res.status(400).json({
+        status: 400,
+        message: "product_id is required",
+      });
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const schedules = await Schedule.find(
+      {
+        product_id: product_id,
+        schedule_date: { $gte: today },
+      },
+      {
+        _id: 1,
+        schedule_name: 1,
+        schedule_date: 1,
+        schedule_close_registration_date: 1,
+        status: 1,
+        product_id: 1,
+        schedule_start: 1,
+        schedule_end: 1,
+        location: 1,
+        quota: 1,
+        duration: 1,
+        schedule_description: 1,
+        schedule_category: 1,
       },
     )
       .sort({ schedule_date: 1 })
@@ -274,6 +383,7 @@ const schedule_calendar_list = async (req, res) => {
         quota: 1,
         duration: 1,
         schedule_description: 1,
+        schedule_category: 1,
       },
     )
       .sort({ schedule_date: 1 });
@@ -330,7 +440,7 @@ const schedule_detail = async (req, res) => {
 const add = async (req, res) => {
   const {
     schedule_name,
-    schedule_description,
+    schedule_category,
     schedule_date,
     schedule_close_registration_date,
     schedule_start,
@@ -346,7 +456,7 @@ const add = async (req, res) => {
   try {
     let payload = {
       schedule_name,
-      schedule_description,
+      schedule_category,
       schedule_close_registration_date,
       schedule_date,
       schedule_start,
@@ -395,7 +505,7 @@ const add_bulk = async (req, res) => {
 
   const payload = data.map((item) => ({
     schedule_name: item.schedule_name,
-    schedule_description: item.schedule_description,
+    schedule_category: item.schedule_category,
     schedule_close_registration_date: item.schedule_close_registration_date,
     schedule_date: item.schedule_date,
     schedule_start: item.schedule_start,
@@ -438,7 +548,7 @@ const adjust = async (req, res) => {
   const { id } = req.params;
   const {
     schedule_name,
-    schedule_description,
+    schedule_category,
     schedule_date,
     schedule_close_registration_date,
     schedule_start,
@@ -454,7 +564,7 @@ const adjust = async (req, res) => {
   try {
     let payload = {
       schedule_name,
-      schedule_description,
+      schedule_category,
       schedule_date,
       schedule_close_registration_date,
       schedule_start,
@@ -516,13 +626,41 @@ const takedown = async (req, res) => {
   }
 };
 
+const schedule_categories = async (req, res) => {
+  try {
+    const categories = await Schedule.distinct("schedule_category", {
+      schedule_category: { $nin: [null, ""] },
+    });
+
+    // Filter out null/undefined/empty values and sort
+    const validCategories = categories
+      .filter((cat) => cat && cat.trim() !== "")
+      .sort((a, b) => a.localeCompare(b));
+
+    res.status(200).json({
+      status: 200,
+      message: "success",
+      data: validCategories,
+    });
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({
+      status: 500,
+      message: "server error",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   add,
   add_bulk,
   schedule_list,
   schedule_public_list,
   schedule_home_list,
+  schedule_by_product,
   schedule_calendar_list,
+  schedule_categories,
   schedule_detail,
   adjust,
   takedown,

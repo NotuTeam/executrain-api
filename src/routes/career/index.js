@@ -19,6 +19,15 @@ const {
   delete_applicant,
 } = require("./applicantController");
 
+const {
+  gallery_list,
+  gallery_list_admin,
+  gallery_detail,
+  gallery_add,
+  gallery_adjust,
+  gallery_takedown,
+} = require("./galleryController");
+
 const { islogin } = require("../../middleware/privilege");
 
 // GET - Career Listings
@@ -49,5 +58,19 @@ career.delete("/takedown/:id", islogin, takedown);
 
 // DELETE - Applicant Management (Protected)
 career.delete("/applicant/:id", islogin, delete_applicant);
+
+// GET - Gallery (Public)
+career.get("/gallery/list", gallery_list);
+career.get("/gallery/list/admin", islogin, gallery_list_admin);
+career.get("/gallery/detail/:id", islogin, gallery_detail);
+
+// POST - Gallery Management (Protected)
+career.post("/gallery/add", islogin, gallery_add);
+
+// PUT - Gallery Management (Protected)
+career.put("/gallery/adjust/:id", islogin, gallery_adjust);
+
+// DELETE - Gallery Management (Protected)
+career.delete("/gallery/takedown/:id", islogin, gallery_takedown);
 
 module.exports = career;
