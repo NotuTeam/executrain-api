@@ -58,9 +58,6 @@ const careerApplicant_schema = new mongoose.Schema({
   current_company: {
     type: String,
   },
-  expected_salary: {
-    type: Number,
-  },
   availability_date: {
     type: Date,
   },

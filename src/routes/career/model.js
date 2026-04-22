@@ -52,12 +52,6 @@ const career_schema = new mongoose.Schema({
     enum: Object.values(EXPERIENCE_LEVEL),
     default: EXPERIENCE_LEVEL.MID,
   },
-  salary_min: {
-    type: Number,
-  },
-  salary_max: {
-    type: Number,
-  },
   vacancies: {
     type: Number,
     default: 1,

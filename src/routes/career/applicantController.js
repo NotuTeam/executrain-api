@@ -18,7 +18,6 @@ const apply_job = async (req, res) => {
     experience_years,
     current_position,
     current_company,
-    expected_salary,
     availability_date,
   } = req.body;
 
@@ -72,7 +71,6 @@ const apply_job = async (req, res) => {
       experience_years: experience_years || 0,
       current_position,
       current_company,
-      expected_salary,
       availability_date,
     };
 

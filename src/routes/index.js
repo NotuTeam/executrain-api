@@ -16,6 +16,8 @@ const metadata = require("./metadata");
 const assets = require("./assets");
 const article = require("./article");
 const career = require("./career");
+const freeTrialProduct = require("./free-trial");
+const scheduleRegistration = require("./schedule-registration");
 
 routes.use("/auth", auth);
 routes.use("/schedule", schedule);
@@ -31,5 +33,7 @@ routes.use("/metadata", metadata);
 routes.use("/assets", assets);
 routes.use("/article", article);
 routes.use("/career", career);
+routes.use("/free-trial", freeTrialProduct);
+routes.use("/schedule-registration", scheduleRegistration);
 
 module.exports = routes;

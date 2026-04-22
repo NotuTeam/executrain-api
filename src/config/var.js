@@ -14,6 +14,9 @@ const config = {
   CDN_CLOUD_NAME: process.env.CDN_CLOUD_NAME,
   CDN_API_KEY: process.env.CDN_API_KEY,
   CDN_API_SECRET: process.env.CDN_API_SECRET,
+  SMTP_GMAIL_USER: process.env.SMTP_GMAIL_USER,
+  SMTP_GMAIL_APP_PASSWORD: process.env.SMTP_GMAIL_APP_PASSWORD,
+  SMTP_GMAIL_FROM_NAME: process.env.SMTP_GMAIL_FROM_NAME,
 };
 
 module.exports = config;
