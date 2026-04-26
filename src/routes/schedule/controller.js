@@ -147,7 +147,7 @@ const schedule_list = async (req, res) => {
 const schedule_public_list = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 6;
+    const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
     const { search, schedule_category, product_category } = req.query;
 
@@ -295,7 +295,8 @@ const schedule_home_list = async (req, res) => {
 const schedule_by_product = async (req, res) => {
   try {
     const { product_id } = req.params;
-    const limit = parseInt(req.query.limit) || 3;
+    const parsedLimit = Number(req.query.limit);
+    const hasLimit = Number.isInteger(parsedLimit) && parsedLimit > 0;
 
     if (!product_id) {
       return res.status(400).json({
@@ -307,7 +308,7 @@ const schedule_by_product = async (req, res) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const schedules = await Schedule.find(
+    const query = Schedule.find(
       {
         product_id: product_id,
         schedule_date: { $gte: today },
@@ -327,9 +328,13 @@ const schedule_by_product = async (req, res) => {
         schedule_description: 1,
         schedule_category: 1,
       },
-    )
-      .sort({ schedule_date: 1 })
-      .limit(limit);
+    ).sort({ schedule_date: 1 });
+
+    if (hasLimit) {
+      query.limit(parsedLimit);
+    }
+
+    const schedules = await query;
 
     // Merge product data into schedules
     const schedulesWithProductData = await mergeProductData(schedules);

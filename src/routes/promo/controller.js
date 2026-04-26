@@ -12,7 +12,7 @@ const {
 const promo_list = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const limit = 6;
+    const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
     const promo_name = req.query.promo_name;

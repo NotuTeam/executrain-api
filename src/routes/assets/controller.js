@@ -7,7 +7,7 @@ const ASSET_CATEGORIES = [
   {
     category: "hero_background",
     name: "Hero Background",
-    default_url: "https://res.cloudinary.com/dgd3iusxa/image/upload/v1764557996/hero_ygtlgs.webp",
+    default_url: "https://res.cloudinary.com/dgd3iusxa/image/upload/v1777208395/executrain/assets/ddxseg9njypotvqwkgdb.jpg",
     type: "image",
   },
   {
@@ -15,18 +15,6 @@ const ASSET_CATEGORIES = [
     name: "Hero Video",
     default_url: "https://res.cloudinary.com/dgd3iusxa/video/upload/v1764557991/hero-vid_d2rydq.mp4",
     type: "video",
-  },
-  {
-    category: "about_image",
-    name: "About Section Image",
-    default_url: "/about.png",
-    type: "image",
-  },
-  {
-    category: "statistic_background",
-    name: "Statistic Background",
-    default_url: "/hero4.webp",
-    type: "image",
   },
   {
     category: "steps_background",

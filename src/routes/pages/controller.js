@@ -9,7 +9,7 @@ const page_list = async (req, res) => {
     const { page = 1, search = "", status, sort_order = "desc" } = req.query;
 
     const pageNum = parseInt(page);
-    const limitNum = 12; // Fixed limit
+   const limit = parseInt(req.query.limit) || 10;
     const skip = (pageNum - 1) * limitNum;
 
     // Build query

@@ -53,7 +53,7 @@ const mergeProductData = async (schedules) => {
 const product_list = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 6;
+    const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
     const product_category = req.query.product_category;
@@ -707,7 +707,8 @@ const takedown_schedule = async (req, res) => {
 const schedule_by_product = async (req, res) => {
   try {
     const { product_id } = req.params;
-    const limit = parseInt(req.query.limit) || 3;
+    const parsedLimit = Number(req.query.limit);
+    const hasLimit = Number.isInteger(parsedLimit) && parsedLimit > 0;
 
     if (!product_id) {
       return res.status(400).json({
@@ -755,7 +756,10 @@ const schedule_by_product = async (req, res) => {
       projection
     ).sort({ schedule_date: -1 });
 
-    const schedules = [...upcomingSchedules, ...fallbackSchedules].slice(0, limit);
+    const combinedSchedules = [...upcomingSchedules, ...fallbackSchedules];
+    const schedules = hasLimit
+      ? combinedSchedules.slice(0, parsedLimit)
+      : combinedSchedules;
 
     const schedulesWithProductData = await mergeProductData(schedules);
 

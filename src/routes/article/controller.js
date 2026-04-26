@@ -93,7 +93,7 @@ const article_list = async (req, res) => {
 
 const article_latest = async (req, res) => {
   try {
-    const limit = parseInt(req.query.limit) || 5;
+    const limit = parseInt(req.query.limit) || 10;
 
     const articles = await Article.find(
       { status: "PUBLISHED" },
