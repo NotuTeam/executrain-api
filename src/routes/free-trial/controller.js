@@ -562,8 +562,21 @@ const add_schedule_bulk = async (req, res) => {
 
     const parseDateValue = (value) => {
       if (!value) return undefined;
-      const parsed = new Date(value);
-      return Number.isNaN(parsed.getTime()) ? undefined : parsed;
+      if (value instanceof Date && !Number.isNaN(value.getTime())) return value;
+      if (typeof value === "string") {
+        const trimmed = value.trim();
+        if (trimmed === "") return undefined;
+        const iso = new Date(trimmed);
+        if (!Number.isNaN(iso.getTime())) return iso;
+        const parts = trimmed.split(/[\/\-\.]/);
+        if (parts.length === 3) {
+          const [a, b, c] = parts.map(Number);
+          if (a > 100) return new Date(a, b - 1, c);
+          if (c > 100) return new Date(c, a - 1, b);
+        }
+        return undefined;
+      }
+      return undefined;
     };
 
     const payload = data
@@ -589,7 +602,7 @@ const add_schedule_bulk = async (req, res) => {
           product_id,
         };
       })
-      .filter((item) => item.schedule_name);
+      .filter((item) => item.schedule_name && item.schedule_date);
 
     if (payload.length === 0) {
       return res.status(400).json({
