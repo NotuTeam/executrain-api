@@ -38,6 +38,7 @@ const submit_registration = async (req, res) => {
       socmed_name: "SALES_EMAIL",
     });
 
+
     if (!salesEmailEntry?.socmed_link) {
       return res.status(404).json({
         status: 404,
