@@ -88,7 +88,7 @@ const submit_registration = async (req, res) => {
 
 <!-- //linear-gradient(135deg, #BE0F34 0%, #8B0A25 100%) -->
     <!-- BANNER HEADER -->
-    <div style="background: url('https://res.cloudinary.com/dyn73qnjx/image/upload/v1777348011/ddxseg9njypotvqwkgdb_1_wr7uus.jpg'); padding:0; overflow:hidden; position:relative; background-size: cover; background-position: center; max-height: 210px;">
+    <div style="background: url('https://res.cloudinary.com/dyn73qnjx/image/upload/v1777349367/ddxseg9njypotvqwkgdb_vqmikd.jpg'); padding:0; overflow:hidden; position:relative; background-size: cover; background-position: center;">
       <!-- Decorative shapes -->
       <div style="position:absolute;top:-30px;right:-30px;width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,0.06);"></div>
       <div style="position:absolute;bottom:-20px;left:40px;width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,0.05);"></div>
@@ -186,15 +186,15 @@ const submit_registration = async (req, res) => {
     <div style="background:#ffffff;border-radius:0 0 12px 12px;padding:24px 32px 28px;">
 
       <!-- Logo + company name -->
-      <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:16px; width: 100%;">
+      <div style="display:flex;flex-direction: column; align-items:center;justify-content:center;gap:10px;margin-bottom:16px; width: 100%;">
         <img height="75" src="https://res.cloudinary.com/dyn73qnjx/image/upload/v1777347612/logo-colored_kamvgo.png"/>
-        <!-- <span style="font-size:14px;font-weight:700;color:#111827;letter-spacing:0.3px;">YOUR COMPANY</span> -->
+            <p style="text-align:center;font-size:12px;color:#9ca3af;margin:0 0 14px;line-height:1.7;">
+        Equity Tower, 26th Floor, Unit H Jl. Jenderal Sudirman Kav. 52 <br/> Senayan, South Jakarta 12190 Indonesia
+      </p>
       </div>
 
       <!-- Address -->
-      <p style="text-align:center;font-size:12px;color:#9ca3af;margin:0 0 14px;line-height:1.7;">
-        Equity Tower, 26th Floor, Unit H Jl. Jenderal Sudirman Kav. 52 <br/> Senayan, South Jakarta 12190 Indonesia
-      </p>
+
 
       <!-- Contact & legal -->
       <p style="text-align:center;font-size:11px;color:#d1d5db;margin:0 0 6px;">
@@ -212,6 +212,7 @@ const submit_registration = async (req, res) => {
 
   </body>
   </html>
+
     `;
 
     await transporter.sendMail({
