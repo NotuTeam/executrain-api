@@ -83,13 +83,12 @@ const submit_registration = async (req, res) => {
 </style>
 <body>
   
-<div style="background:#f0f2f5; padding:32px 16px; font-family: Arial, sans-serif;">
+<div style="background:#f0f2f5; font-family: Arial, sans-serif;">
   <h2 class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);">Preview template email registrasi jadwal</h2>
 
-  <div style="max-width:620px; margin:0 auto;">
 <!-- //linear-gradient(135deg, #BE0F34 0%, #8B0A25 100%) -->
     <!-- BANNER HEADER -->
-    <div style="background: url('https://res.cloudinary.com/dyn73qnjx/image/upload/v1777348011/ddxseg9njypotvqwkgdb_1_wr7uus.jpg'); border-radius:12px 12px 0 0; padding:0; overflow:hidden; position:relative; background-size: cover; background-position: center;">
+    <div style="background: url('https://res.cloudinary.com/dyn73qnjx/image/upload/v1777348011/ddxseg9njypotvqwkgdb_1_wr7uus.jpg'); padding:0; overflow:hidden; position:relative; background-size: cover; background-position: center;">
       <!-- Decorative shapes -->
       <div style="position:absolute;top:-30px;right:-30px;width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,0.06);"></div>
       <div style="position:absolute;bottom:-20px;left:40px;width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,0.05);"></div>
@@ -98,9 +97,6 @@ const submit_registration = async (req, res) => {
       <div style="position:relative; z-index:1; padding:36px 32px 28px;">
         <!-- Logo area -->
         <div style="display:flex; align-items:center; justify-content: space-between; gap:10px; margin-bottom:24px;">
-        <div style="display:inline-block;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);border-radius:20px;padding:4px 14px;margin-bottom:16px;">
-          <span style="color:rgba(255,255,255,0.95);font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;">Registration Notification</span>
-        </div>
 
           <img src="https://res.cloudinary.com/dyn73qnjx/image/upload/v1777347226/logo_alldjx.png" alt="logo_company"/>
           <!-- <span style="color:rgba(255,255,255,0.9);font-size:15px;font-weight:700;letter-spacing:0.5px;">YOUR COMPANY</span> -->
@@ -213,13 +209,10 @@ const submit_registration = async (req, res) => {
         © 2026 PT. Executrain Nusantarajaya. All rights reserved. &nbsp;·&nbsp;
       </p>
     </div>
-
-  </div>
 </div>
 
   </body>
   </html>
-
     `;
 
     await transporter.sendMail({
