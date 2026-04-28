@@ -121,7 +121,6 @@ const submit_registration = async (req, res) => {
 
       <!-- Section label -->
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
-        <div style="width:4px;height:20px;background:#BE0F34;border-radius:2px;"></div>
         <span style="font-size:12px;font-weight:700;color:#BE0F34;letter-spacing:1px;text-transform:uppercase;">Submission Details</span>
       </div>
 
@@ -213,6 +212,7 @@ const submit_registration = async (req, res) => {
 
   </body>
   </html>
+
     `;
 
     await transporter.sendMail({
